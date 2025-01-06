@@ -19,12 +19,14 @@ class TaskResource extends JsonResource
             'name' => $this->name,
             'description' => $this->description,
             'status' => $this->status,
+            'image_path' => $this->image_path,
             'priority' => $this->priority,
             'created_at' => $this->created_at->format('d-m-Y H:i:s'),
             'updated_at' => $this->updated_at->format('d-m-Y H:i:s'),
             'project' => new ProjectResource($this->project),
-            'created_by' => new UserResource($this->createdBy),
-            'updated_by' => new UserResource($this->updatedBy),
+            'assigned_user' => $this->assignedTo ? new UserResource($this->assignedTo) : null,
+            'created_by' => $this->createdBy ? new UserResource($this->createdBy) : null,
+            'updated_by' => $this->updatedBy ? new UserResource($this->updatedBy) : null,
             // 'comments' => CommentResource::collection($this->comments),
         ];
         return parent::toArray($request);

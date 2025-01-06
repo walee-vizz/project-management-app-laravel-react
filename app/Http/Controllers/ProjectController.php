@@ -2,10 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Project;
+use App\Http\Resources\TaskResource;
+use App\Http\Resources\ProjectResource;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
-use App\Http\Resources\ProjectResource;
-use App\Models\Project;
 
 class ProjectController extends Controller
 {
@@ -15,6 +16,9 @@ class ProjectController extends Controller
     public function index()
     {
         $query = Project::query();
+        $sort_by = request('sortBy', 'created_at');
+        $sort_dir = request('sortDir', 'DESC');
+
 
         if (request('name')) {
             $query->where('name', 'like', '%' . request('name') . '%');
@@ -22,7 +26,18 @@ class ProjectController extends Controller
         if (request('status')) {
             $query->where('status', request('status'));
         }
-        $projects = $query->paginate(15)->onEachSide(1);
+
+
+        if (request('start_date')) {
+            $query->whereDate('created_at', '>=', request('start_date'));
+        }
+        if (request('end_date')) {
+            $query->whereDate('created_at', '<=', request('end_date'));
+        }
+
+
+        $projects = $query->orderBy($sort_by, $sort_dir)
+            ->paginate(15)->onEachSide(1);
         $data = [
             'projects' => ProjectResource::collection($projects),
             'queryParams' => request()->query() ?: null
@@ -51,7 +66,36 @@ class ProjectController extends Controller
      */
     public function show(Project $project)
     {
-        //
+        $query = $project->tasks();
+        $sort_by = request('sortBy', 'created_at');
+        $sort_dir = request('sortDir', 'DESC');
+
+
+        if (request('name')) {
+            $query->where('name', 'like', '%' . request('name') . '%');
+        }
+        if (request('status')) {
+            $query->where('status', request('status'));
+        }
+
+
+        if (request('start_date')) {
+            $query->whereDate('created_at', '>=', request('start_date'));
+        }
+        if (request('end_date')) {
+            $query->whereDate('created_at', '<=', request('end_date'));
+        }
+
+
+        $tasks = $query->orderBy($sort_by, $sort_dir)
+            ->paginate(15)->onEachSide(1);
+        $data = [
+            'tasks' => TaskResource::collection($tasks),
+            'queryParams' => request()->query() ?: null,
+            'project' => new ProjectResource($project),
+
+        ];
+        return  inertia('Projects/Show', $data);
     }
 
     /**

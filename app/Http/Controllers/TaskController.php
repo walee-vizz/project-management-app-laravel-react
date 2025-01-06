@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreTaskRequest;
 use App\Http\Requests\UpdateTaskRequest;
+use App\Http\Resources\TaskResource;
 use App\Models\Task;
 
 class TaskController extends Controller
@@ -13,7 +14,34 @@ class TaskController extends Controller
      */
     public function index()
     {
-        //
+        $query = Task::query();
+        $sort_by = request('sortBy', 'created_at');
+        $sort_dir = request('sortDir', 'DESC');
+
+
+        if (request('name')) {
+            $query->where('name', 'like', '%' . request('name') . '%');
+        }
+        if (request('status')) {
+            $query->where('status', request('status'));
+        }
+
+
+        if (request('start_date')) {
+            $query->whereDate('created_at', '>=', request('start_date'));
+        }
+        if (request('end_date')) {
+            $query->whereDate('created_at', '<=', request('end_date'));
+        }
+
+
+        $tasks = $query->orderBy($sort_by, $sort_dir)
+            ->paginate(15)->onEachSide(1);
+        $data = [
+            'tasks' => TaskResource::collection($tasks),
+            'queryParams' => request()->query() ?: null
+        ];
+        return inertia("Tasks/Index", $data);
     }
 
     /**
