@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Project;
+use Illuminate\Support\Str;
 use App\Http\Resources\TaskResource;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ProjectResource;
+use Illuminate\Support\Facades\Session;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 
@@ -34,13 +37,16 @@ class ProjectController extends Controller
         if (request('end_date')) {
             $query->whereDate('created_at', '<=', request('end_date'));
         }
+        session()->forget('success');
 
-
+        // request()->session()->flush();
+        // Session::put('error', 'Error');
         $projects = $query->orderBy($sort_by, $sort_dir)
             ->paginate(15)->onEachSide(1);
         $data = [
             'projects' => ProjectResource::collection($projects),
-            'queryParams' => request()->query() ?: null
+            'queryParams' => request()->query() ?: null,
+
         ];
         return inertia("Projects/Index", $data);
     }
@@ -50,7 +56,8 @@ class ProjectController extends Controller
      */
     public function create()
     {
-        //
+        $data = [];
+        return inertia('Projects/Create', $data);
     }
 
     /**
@@ -58,7 +65,20 @@ class ProjectController extends Controller
      */
     public function store(StoreProjectRequest $request)
     {
-        //
+        // dd($request->all());
+        $image = $request->file('image') ?? null;
+        $validated = $request->validated();
+        $validated['created_by'] = Auth::id();
+        $validated['updated_by'] = Auth::id();
+        if ($image) {
+            $file_name = Str::random() . '-' . $image->getClientOriginalName();
+            $uploaded = $image->store('projects', 'public');
+            $validated['image_path'] = $uploaded;
+        }
+        $project = Project::create($validated);
+
+        return redirect()->route('projects.index', $project->id)->with('success', 'Project created successfully');
+        dd($validated);
     }
 
     /**
@@ -103,7 +123,10 @@ class ProjectController extends Controller
      */
     public function edit(Project $project)
     {
-        //
+        $data = [
+            'project' => new ProjectResource($project),
+        ];
+        return  inertia('Projects/Edit', $data);
     }
 
     /**
@@ -111,7 +134,7 @@ class ProjectController extends Controller
      */
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        //
+        dd($request->all());
     }
 
     /**
@@ -119,6 +142,10 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
-        //
+        if ($project->delete()) {
+            return redirect()->route('projects.index')->with('success', 'Project deleted successfully');
+        } else {
+            return redirect()->route('projects.index')->with('error', 'Project failed to be deleted');
+        }
     }
 }

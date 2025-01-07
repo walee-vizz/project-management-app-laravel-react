@@ -1,6 +1,6 @@
 
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
-import { Head } from "@inertiajs/react";
+import { Head, Link } from "@inertiajs/react";
 import { PROJECT_STATUS_CLASS_MAP, PROJECT_STATUS_TEXT_MAP } from '@/constants';
 import TasksTable from "../Tasks/TasksTable";
 
@@ -10,9 +10,17 @@ export default function Show({ auth, project, tasks, queryParams }) {
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                    Project - {project.name}
-                </h2>
+                <div className="flex items-center justify-between">
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                        Project - {project.name}
+                    </h2>
+                    <Link
+                        href={route("projects.index")}
+                        className="px-3 py-1 text-white transition-all rounded shadow bg-emerald-500 hover:bg-emerald-600"
+                    >
+                        Back
+                    </Link>
+                </div>
             }>
             <Head title={`Project - ${project.name}`} />
             <div className="py-12">
@@ -81,7 +89,7 @@ export default function Show({ auth, project, tasks, queryParams }) {
             </div>
             <div className="py-12">
                 <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <TasksTable tasks={tasks} queryParams={queryParams} />
+                    <TasksTable tasks={tasks} queryParams={queryParams} showProject={false} />
                 </div>
             </div>
         </AuthenticatedLayout>

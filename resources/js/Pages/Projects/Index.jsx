@@ -1,3 +1,4 @@
+import Alert from '@/Components/Alert';
 import Pagination from '@/Components/Pagination';
 import SelectInput from '@/Components/SelectInput';
 import TableHeading from '@/Components/TableHeading';
@@ -7,8 +8,9 @@ import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Button } from '@headlessui/react';
 import { Head, Link, router } from '@inertiajs/react';
 
-export default function Index({ auth, projects, queryParams = null }) {
+export default function Index({ auth, sessionParams, projects, queryParams = null, session = null }) {
 
+    sessionParams = sessionParams || {};
     queryParams = queryParams || {};
     const sortByField = queryParams.sortBy || 'created_at';
     const sortDir = queryParams.sortDir || 'DESC';
@@ -44,13 +46,30 @@ export default function Index({ auth, projects, queryParams = null }) {
         router.get(route('projects.index', queryParams));
 
     }
+
+
+    const deleteProject = (project) => {
+        if (confirm('Are you sure you want to delete this project?')) {
+            router.delete(route('projects.destroy', project.id));
+        }
+
+    }
     return (
         <AuthenticatedLayout
             user={auth.user}
             header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                    Projects
-                </h2>
+                <div className="flex items-center justify-between">
+
+                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
+                        Projects
+                    </h2>
+                    <Link
+                        href={route("projects.create")}
+                        className="px-3 py-1 text-white transition-all rounded shadow bg-emerald-500 hover:bg-emerald-600"
+                    >
+                        Add new
+                    </Link>
+                </div>
             }
         >
             <Head title="Projects" />
@@ -176,11 +195,11 @@ export default function Index({ auth, projects, queryParams = null }) {
                                             <td className="px-6 py-4">
                                                 {project.created_by.name}
                                             </td>
-                                            <td className="px-6 py-4">
+                                            <td className="px-6 py-4 text-nowrap">
                                                 <Link href={route('projects.edit', { project: project.id })} className="mx-1 font-medium text-blue-600 dark:text-blue-500 hover:underline" >
                                                     Edit
                                                 </Link>
-                                                <Link href={route('projects.destroy', { project: project.id })} className="mx-1 font-medium text-red-600 dark:text-red-500 hover:underline" >
+                                                <Link onClick={e => deleteProject(project)} className="mx-1 font-medium text-red-600 dark:text-red-500 hover:underline" >
                                                     Delete
                                                 </Link>
                                             </td>

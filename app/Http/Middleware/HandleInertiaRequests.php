@@ -35,6 +35,10 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user() ? new UserResource($request->user()) : null,
             ],
+            'sessionParams' => [
+                'success' => session('success', null),
+                'error' => session('error', null)
+            ]
         ];
     }
 }

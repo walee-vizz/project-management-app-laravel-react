@@ -6,7 +6,7 @@ import { TASK_STATUS_CLASS_MAP, TASK_STATUS_TEXT_MAP } from '@/constants';
 import { Link, router } from '@inertiajs/react';
 import { Button } from '@headlessui/react';
 
-export default function TasksTable({ tasks, queryParams }) {
+export default function TasksTable({ tasks, queryParams, showProject = true }) {
 
     queryParams = queryParams || {};
     const sortByField = queryParams.sortBy || 'created_at';
@@ -120,7 +120,10 @@ export default function TasksTable({ tasks, queryParams }) {
                             </TableHeading>
                             <TableHeading onClick={() => sortBy('name')} sortByField={sortByField} currentField="name" sortDir={sortDir} >Name</TableHeading>
                             <TableHeading onClick={() => sortBy('status')} sortByField={sortByField} currentField="status" sortDir={sortDir} >Status</TableHeading>
-                            <TableHeading onClick={() => sortBy('project')} sortByField={sortByField} currentField="project" sortDir={sortDir} >Project</TableHeading>
+                            {
+                                showProject ? <TableHeading onClick={() => sortBy('project')} sortByField={sortByField} currentField="project" sortDir={sortDir} >Project Name</TableHeading> : null
+                            }
+
                             <TableHeading sortable={false} >Priority</TableHeading>
                             <TableHeading sortable={false} >
                                 Assigned To
@@ -150,9 +153,13 @@ export default function TasksTable({ tasks, queryParams }) {
 
                                     <span className={'px-2 py-1 rounded text-gray-900 dark:text-white ' + TASK_STATUS_CLASS_MAP[task.status]}>{TASK_STATUS_TEXT_MAP[task.status]}</span>
                                 </td>
-                                <td className="px-6 py-4">
-                                    {task.project.name}
-                                </td>
+                                {
+                                    showProject ?
+                                        <td className="px-6 py-4">
+                                            {task.project.name}
+                                        </td>
+                                        : null
+                                }
                                 <td className="px-6 py-4">
                                     {task.priority}
                                 </td>

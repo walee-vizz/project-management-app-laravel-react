@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+</head>
+<body>
+
+<canvas id="qrcode"></canvas>
+
+<script>
+    // Example data to encode in the QR code
+    let data = "PKHERBSMAJOON00192"; // Ensure this is a non-empty string
+
+    // Check if the data is valid
+    if (!data || typeof data !== 'string') {
+        console.error('Invalid data for QR code generation:', data);
+    } else {
+        // Generate the QR code
+        QRCode.toCanvas(document.getElementById('qrcode'), data, function (error) {
+            if (error) {
+                console.error('Error generating QR code:', error);
+            } else {
+                console.log('QR code generated successfully!');
+            }
+        });
+    }
+</script>
+
+</body>
+</html>

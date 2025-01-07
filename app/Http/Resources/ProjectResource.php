@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class ProjectResource extends JsonResource
@@ -18,7 +19,7 @@ class ProjectResource extends JsonResource
         return [
             'id' => $this->id,
             'name' => $this->name,
-            'image_path' => $this->image_path,
+            'image_path' => $this->image_path ? Storage::url($this->image_path) : null,
             'description' => $this->description,
             'status' => $this->status,
             'created_by' => new UserResource($this->createdBy),
