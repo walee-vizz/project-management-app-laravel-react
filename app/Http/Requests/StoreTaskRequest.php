@@ -2,6 +2,9 @@
 
 namespace App\Http\Requests;
 
+use App\Enums\TaskPriority;
+use App\Enums\TaskStatus;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreTaskRequest extends FormRequest
@@ -11,7 +14,7 @@ class StoreTaskRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +25,16 @@ class StoreTaskRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'project_id' => ['required'],
+            'name' => 'required|string|unique:projects,name|max:255',
+            'image' => 'nullable|image',
+            'description' => 'nullable|string',
+            'due_date' => 'required|date',
+            'status' => ['required', Rule::in(TaskStatus::getValues())],
+            'priority' => ['required', Rule::in(TaskPriority::getValues())],
+            'assigned_user_id' => ['required'],
+            'created_by' => ['required'],
+            'updated_by' => ['required'],
         ];
     }
 }

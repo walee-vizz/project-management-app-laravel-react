@@ -8,6 +8,7 @@ use App\Http\Resources\TaskResource;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ProjectResource;
 use Illuminate\Support\Facades\Session;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Requests\StoreProjectRequest;
 use App\Http\Requests\UpdateProjectRequest;
 
@@ -78,7 +79,6 @@ class ProjectController extends Controller
         $project = Project::create($validated);
 
         return redirect()->route('projects.index', $project->id)->with('success', 'Project created successfully');
-        dd($validated);
     }
 
     /**
@@ -126,6 +126,7 @@ class ProjectController extends Controller
         $data = [
             'project' => new ProjectResource($project),
         ];
+        // dd($data);
         return  inertia('Projects/Edit', $data);
     }
 
@@ -134,7 +135,19 @@ class ProjectController extends Controller
      */
     public function update(UpdateProjectRequest $request, Project $project)
     {
-        dd($request->all());
+        $image = $request->file('image') ?? null;
+        $validated = $request->validated();
+
+        if ($image) {
+            if ($project->image_path) {
+                Storage::disk('public')->delete($project->image_path);
+            }
+            $file_name = Str::random() . '-' . $image->getClientOriginalName();
+            $uploaded = $image->store('projects', 'public');
+            $validated['image_path'] = $uploaded;
+        }
+        $project->update($validated);
+        return redirect()->route('projects.show', $project->id)->with('success', 'Project updated successfully');
     }
 
     /**
@@ -142,7 +155,11 @@ class ProjectController extends Controller
      */
     public function destroy(Project $project)
     {
+        $image = $project->image_path;
         if ($project->delete()) {
+            if ($image) {
+                Storage::disk('public')->delete($image);
+            }
             return redirect()->route('projects.index')->with('success', 'Project deleted successfully');
         } else {
             return redirect()->route('projects.index')->with('error', 'Project failed to be deleted');

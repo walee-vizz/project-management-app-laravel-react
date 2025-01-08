@@ -21,7 +21,6 @@ export default function Create({ auth }) {
     const onSubmit = (e) => {
         e.preventDefault();
 
-        console.log('data', data);
         post(route('projects.store'), data);
     }
     return (
@@ -77,23 +76,18 @@ export default function Create({ auth }) {
                             <div className="mt-4">
                                 <InputLabel htmlFor="project_status" value="Project Status" />
 
+
                                 <SelectInput
                                     name="status"
                                     id="project_status"
-                                    className={"block w-full mt-1 cursor-pointer " + (errors.status ? 'border-red-500' : '')}
-                                    onChange={(e) => setData("status", e.target.value)}
-                                >
-                                    <option value="">Select Status</option>
-                                    {/* <option value="pending">Pending</option>
-                                    <option value="in_progress">In Progress</option>
-                                    <option value="completed">Completed</option> */}
-                                    {Object.entries(PROJECT_STATUS_TEXT_MAP).map(([status, text]) => (
-                                        <option key={status} value={status}>
-                                            {text}
-                                        </option>
-                                    ))}
-                                </SelectInput>
-
+                                    placeholder="Select Status"
+                                    className={`block w-full mt-1 cursor-pointer ${errors.status ? 'border-red-500' : ''}`}
+                                    options={Object.entries(PROJECT_STATUS_TEXT_MAP).map(([status, text]) => ({
+                                        value: status,
+                                        label: text
+                                    }))}
+                                    onChange={(selectedOption) => setData("status", selectedOption ? selectedOption.value : '')}
+                                />
                                 <InputError message={errors.status} className="mt-2" />
                             </div>
                             <div className='mt-3'>
