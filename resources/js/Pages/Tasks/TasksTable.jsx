@@ -7,30 +7,29 @@ import { Link, router } from '@inertiajs/react';
 import { Button } from '@headlessui/react';
 
 export default function TasksTable({ tasks, queryParams, showProject = true }) {
-
+    const currentRoute = route().current();
     queryParams = queryParams || {};
     const sortByField = queryParams.sortBy || 'created_at';
     const sortDir = queryParams.sortDir || 'DESC';
 
     const searchFieldChanged = async (name, value) => {
-        // console.log('Search field changed :' + name + ' -> ' + value);
         if (name == 'submit' && value == 'submit') {
-            router.get(route('tasks.index'), queryParams);
+            router.get(route(currentRoute), queryParams);
             return;
         } else if (name == 'clear' && value == 'clear') {
             if (queryParams?.page && queryParams.page > 0) {
-                router.get(route('tasks.index'), { page: queryParams.page });
+                router.get(route(currentRoute), { page: queryParams.page });
                 return;
             }
             queryParams = {};
-            router.get(route('tasks.index'));
+            router.get(route(currentRoute));
             return;
         } else if (value) {
             queryParams[name] = value;
         } else {
             delete queryParams[name];
         }
-        router.get(route('tasks.index', queryParams));
+        router.get(route(currentRoute, queryParams));
     };
 
 
@@ -42,16 +41,14 @@ export default function TasksTable({ tasks, queryParams, showProject = true }) {
 
     const sortBy = async (name) => {
 
-        // console.log('Sort by :' + name, queryParams.sortBy);
         if (name == queryParams.sortBy) {
             queryParams.sortDir = queryParams.sortDir == 'ASC' ? 'DESC' : 'ASC';
         } else {
             queryParams.sortBy = name;
             queryParams.sortDir = 'ASC';
         }
-        // console.log('Sort Dir :' + queryParams.sortDir);
 
-        router.get(route('tasks.index', queryParams));
+        router.get(route(currentRoute, queryParams));
 
     }
 

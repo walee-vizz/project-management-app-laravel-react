@@ -3,7 +3,6 @@ import { Link, usePage } from '@inertiajs/react';
 export default function Pagination({ Links, queryParams = {} }) {
     const { url: currentUrl } = usePage();
 
-    console.log('query params:', queryParams);
     // Remove 'page' parameter from queryParams
     const filteredParams = Object.keys(queryParams)
         .filter(param => param !== 'page')
@@ -14,8 +13,6 @@ export default function Pagination({ Links, queryParams = {} }) {
 
     // Convert object to query string
     const urlParams = new URLSearchParams(filteredParams).toString();
-
-    console.log('query params updated:', urlParams);
 
     return (
         <nav aria-label="Page navigation" className="mt-4 text-center">

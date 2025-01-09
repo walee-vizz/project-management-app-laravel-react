@@ -56,6 +56,48 @@ class TaskController extends Controller
         return inertia("Tasks/Index", $data);
     }
 
+
+    /**
+     * Display a listing of the resource.
+     */
+    public function my_tasks()
+    {
+        $query = Task::query();
+        $sort_by = request('sortBy', 'created_at');
+        $sort_dir = request('sortDir', 'DESC');
+        $query->where('assigned_user_id', Auth::id());
+        $query->where(function ($q) {
+            if (request('search')) {
+                $q->where('name', 'like', '%' . request('search') . '%')
+                    ->orWhereHas('project', function ($q) {
+                        $q->where('name', 'like', '%' . request('search') . '%');
+                    });
+            }
+        });
+
+        if (request('status')) {
+            $query->where('status', request('status'));
+        }
+
+
+        if (request('from_date')) {
+            $query->whereDate('created_at', '>=', request('from_date'));
+        }
+        if (request('to_date')) {
+            $query->whereDate('created_at', '<=', request('to_date'));
+        }
+
+
+        $tasks = $query->orderBy($sort_by, $sort_dir)
+            ->paginate(15)->onEachSide(1);
+        $data = [
+            'tasks' => TaskResource::collection($tasks),
+            'queryParams' => request()->query() ?: null
+        ];
+        return inertia("Tasks/Index", $data);
+    }
+
+
     /**
      * Show the form for creating a new resource.
      */
