@@ -13,8 +13,19 @@ export default function TasksTable({ tasks, queryParams, showProject = true }) {
     const sortDir = queryParams.sortDir || 'DESC';
 
     const searchFieldChanged = async (name, value) => {
-        console.log('Search field changed :' + name + ' -> ' + value);
-        if (value) {
+        // console.log('Search field changed :' + name + ' -> ' + value);
+        if (name == 'submit' && value == 'submit') {
+            router.get(route('tasks.index'), queryParams);
+            return;
+        } else if (name == 'clear' && value == 'clear') {
+            if (queryParams?.page && queryParams.page > 0) {
+                router.get(route('tasks.index'), { page: queryParams.page });
+                return;
+            }
+            queryParams = {};
+            router.get(route('tasks.index'));
+            return;
+        } else if (value) {
             queryParams[name] = value;
         } else {
             delete queryParams[name];
@@ -31,18 +42,27 @@ export default function TasksTable({ tasks, queryParams, showProject = true }) {
 
     const sortBy = async (name) => {
 
-        console.log('Sort by :' + name, queryParams.sortBy);
+        // console.log('Sort by :' + name, queryParams.sortBy);
         if (name == queryParams.sortBy) {
             queryParams.sortDir = queryParams.sortDir == 'ASC' ? 'DESC' : 'ASC';
         } else {
             queryParams.sortBy = name;
             queryParams.sortDir = 'ASC';
         }
-        console.log('Sort Dir :' + queryParams.sortDir);
+        // console.log('Sort Dir :' + queryParams.sortDir);
 
         router.get(route('tasks.index', queryParams));
 
     }
+
+
+    const deleteTask = (task) => {
+        if (confirm('Are you sure you want to delete this task?')) {
+            router.delete(route('tasks.destroy', task.id));
+        }
+
+    }
+
     return (
 
         <div className="overflow-hidden bg-white shadow-sm sm:rounded-lg">
@@ -50,11 +70,11 @@ export default function TasksTable({ tasks, queryParams, showProject = true }) {
                 {/* Search Field */}
                 <div className="flex items-center w-full sm:w-auto">
                     <label htmlFor="search" className="sr-only">Search</label>
-                    <TextInput type="text" id="search" placeholder="Search by name..."
-                        defaultValue={queryParams.name}
+                    <TextInput type="text" id="search" placeholder="Search ..."
+                        defaultValue={queryParams.search}
                         className={"block w-full px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg sm:w-64 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"}
-                        onBlur={e => searchFieldChanged('name', e.target.value)}
-                        onKeyPress={e => onKeyPress('name', e)}
+                        onBlur={e => searchFieldChanged('search', e.target.value)}
+                        onKeyPress={e => onKeyPress('search', e)}
 
                     />
                 </div>
@@ -62,39 +82,41 @@ export default function TasksTable({ tasks, queryParams, showProject = true }) {
                 {/* Filter by Status */}
                 <div className="flex items-center w-full sm:w-auto">
                     <label htmlFor="status" className="sr-only">Status</label>
-                    <SelectInput id="status" className="block w-full px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer sm:w-48 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                    <SelectInput
+                        name="status"
+                        id="status"
+                        placeholder="Select Status"
+                        className={`block w-full mt-1 cursor-pointer `}
                         defaultValue={queryParams.status}
-                        onChange={e => searchFieldChanged('status', e.target.value)}
-                    >
-                        <option value="">All Statuses</option>
-                        {Object.entries(TASK_STATUS_TEXT_MAP).map(([status, text]) => (
-                            <option key={status} value={status}>
-                                {text}
-                            </option>
-                        ))}
-                    </SelectInput>
+                        options={Object.entries(TASK_STATUS_TEXT_MAP).map(([status, text]) => ({
+                            value: status,
+                            label: text
+                        }))}
+                        value={queryParams.status}
+                        onChange={(selectedOption) => searchFieldChanged("status", selectedOption ? selectedOption.value : '')}
+                    />
                 </div>
 
                 {/* Filter by Date Range */}
                 <div className="flex items-center w-full gap-4 sm:w-auto">
                     <div>
-                        <label htmlFor="start-date" className="sr-only">Start Date</label>
-                        <TextInput type="date" id="start-date" placeholder="Search by name..."
-                            defaultValue={queryParams.start_date}
+                        <label htmlFor="from-date" className="sr-only">Start Date</label>
+                        <TextInput type="date" id="from-date"
+                            defaultValue={queryParams.from_date}
                             className={"block w-full px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg sm:w-64 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"}
-                            onBlur={e => searchFieldChanged('start_date', e.target.value)}
-                            onKeyPress={e => onKeyPress('start_date', e)}
+                            onBlur={e => searchFieldChanged('from_date', e.target.value)}
+                            onKeyPress={e => onKeyPress('from_date', e)}
 
                         />
                     </div>
                     <span className="text-gray-500 dark:text-gray-400">to</span>
                     <div>
-                        <label htmlFor="end-date" className="sr-only">End Date</label>
-                        <TextInput type="date" id="end-date" placeholder="Search by name..."
-                            defaultValue={queryParams.end_date}
-                            className={"block w-full px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg sm:w-64 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"}
-                            onBlur={e => searchFieldChanged('end_date', e.target.value)}
-                            onKeyPress={e => onKeyPress('end_date', e)}
+                        <label htmlFor="to-date" className="sr-only">To Date</label>
+                        <TextInput type="date" id="to-date"
+                            defaultValue={queryParams.to_date}
+                            className={"block w-full px-4 py-2 text-nowrap text-sm text-gray-900 border border-gray-300 rounded-lg sm:w-64 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"}
+                            onBlur={e => searchFieldChanged('to_date', e.target.value)}
+                            onKeyPress={e => onKeyPress('to_date', e)}
 
                         />
                     </div>
@@ -106,13 +128,22 @@ export default function TasksTable({ tasks, queryParams, showProject = true }) {
                     onClick={e => searchFieldChanged('submit', 'submit')}>
                     Search
                 </Button>
+                {
+                    queryParams.search || queryParams.from_date || queryParams.to_date || queryParams.status ?
+
+                        <Button className={"px-4 py-2 text-sm font-medium text-white bg-gray-600 rounded-lg shadow hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-500 dark:hover:bg-gray-600 dark:focus:ring-offset-gray-800"}
+                            onClick={e => searchFieldChanged('clear', 'clear')}>
+                            Clear Search
+                        </Button>
+                        : null
+                }
             </div>
             <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
                 <table className="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400">
                     <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                         <tr>
                             <TableHeading onClick={() => sortBy('id')} sortByField={sortByField} currentField="id" sortDir={sortDir} >
-                                ID
+                                Sr. No
                             </TableHeading>
 
                             <TableHeading sortable={false} sortByField={sortByField} currentField="id" sortDir={sortDir} >
@@ -138,16 +169,19 @@ export default function TasksTable({ tasks, queryParams, showProject = true }) {
                         </tr>
                     </thead>
                     <tbody>
-                        {tasks.data.map((task) => (
+                        {tasks.data.map((task, index) => (
                             <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" key={task.id}>
                                 <td className="px-6 py-4">
-                                    {task.id}
+                                    {/* {task.id} */}
+                                    {index + 1}
                                 </td>
                                 <td className="px-6 py-4">
-                                    <img src={task.image_path} alt={task.name} />
+                                    <img src={task.image_path} alt={task.name} className="w-20 h-20 rounded-half" />
                                 </td>
-                                <th scope="row" className="px-6 py-4 font-medium text-gray-900 whitespace-nowrap dark:text-white">
-                                    {task.name}
+                                <th scope="row" className="px-6 py-4 font-medium text-gray-900 hover:underline whitespace-nowrap dark:text-white">
+                                    <Link href={route('tasks.show', task.id)} >
+                                        {task.name}
+                                    </Link>
                                 </th>
                                 <td className="px-6 py-4">
 
@@ -176,7 +210,7 @@ export default function TasksTable({ tasks, queryParams, showProject = true }) {
                                     <Link href={route('tasks.edit', { task: task.id })} className="mx-1 font-medium text-blue-600 dark:text-blue-500 hover:underline" >
                                         Edit
                                     </Link>
-                                    <Link href={route('tasks.destroy', { task: task.id })} className="mx-1 font-medium text-red-600 dark:text-red-500 hover:underline" >
+                                    <Link onClick={e => deleteTask(task)} className="mx-1 font-medium text-red-600 dark:text-red-500 hover:underline" >
                                         Delete
                                     </Link>
                                 </td>
@@ -186,7 +220,7 @@ export default function TasksTable({ tasks, queryParams, showProject = true }) {
 
                     </tbody>
                 </table>
-                <Pagination Links={tasks.meta.links} className="mx-auto" />
+                <Pagination Links={tasks.meta.links} className="mx-auto" queryParams={queryParams} />
             </div>
         </div>
     )

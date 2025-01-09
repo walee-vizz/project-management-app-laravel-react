@@ -3,10 +3,13 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class TaskResource extends JsonResource
 {
+    public static $wrap = false;
+
     /**
      * Transform the resource into an array.
      *
@@ -19,7 +22,7 @@ class TaskResource extends JsonResource
             'name' => optional($this)->name,
             'description' => optional($this)->description,
             'status' => optional($this)->status,
-            'image_path' => optional($this)->image_path,
+            'image_path' => $this->image_path ? Storage::url($this->image_path) : null,
             'priority' => optional($this)->priority,
             'project' => $this->project ? new ProjectResource($this->project) : null,
             'assigned_user' => $this->assignedTo ? new UserResource($this->assignedTo) : null,

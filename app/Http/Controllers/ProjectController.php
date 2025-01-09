@@ -24,19 +24,19 @@ class ProjectController extends Controller
         $sort_dir = request('sortDir', 'DESC');
 
 
-        if (request('name')) {
-            $query->where('name', 'like', '%' . request('name') . '%');
+        if (request('search')) {
+            $query->where('name', 'like', '%' . request('search') . '%');
         }
         if (request('status')) {
             $query->where('status', request('status'));
         }
 
 
-        if (request('start_date')) {
-            $query->whereDate('created_at', '>=', request('start_date'));
+        if (request('from_date')) {
+            $query->whereDate('created_at', '>=', request('from_date'));
         }
-        if (request('end_date')) {
-            $query->whereDate('created_at', '<=', request('end_date'));
+        if (request('to_date')) {
+            $query->whereDate('created_at', '<=', request('to_date'));
         }
         session()->forget('success');
 

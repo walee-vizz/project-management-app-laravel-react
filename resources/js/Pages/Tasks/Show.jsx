@@ -2,7 +2,6 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head, Link } from "@inertiajs/react";
 import { TASK_STATUS_CLASS_MAP, TASK_STATUS_TEXT_MAP } from '@/constants';
-import TasksTable from "../Tasks/TasksTable";
 
 export default function Show({ auth, task, tasks, queryParams }) {
 
@@ -94,11 +93,6 @@ export default function Show({ auth, task, tasks, queryParams }) {
                             </div>
                         </div>
                     </div>
-                </div>
-            </div>
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <TasksTable tasks={tasks} queryParams={queryParams} showTask={false} />
                 </div>
             </div>
         </AuthenticatedLayout>

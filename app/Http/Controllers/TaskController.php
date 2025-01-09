@@ -25,20 +25,25 @@ class TaskController extends Controller
         $sort_by = request('sortBy', 'created_at');
         $sort_dir = request('sortDir', 'DESC');
 
+        $query->where(function ($q) {
+            if (request('search')) {
+                $q->where('name', 'like', '%' . request('search') . '%')
+                    ->orWhereHas('project', function ($q) {
+                        $q->where('name', 'like', '%' . request('search') . '%');
+                    });
+            }
+        });
 
-        if (request('name')) {
-            $query->where('name', 'like', '%' . request('name') . '%');
-        }
         if (request('status')) {
             $query->where('status', request('status'));
         }
 
 
-        if (request('start_date')) {
-            $query->whereDate('created_at', '>=', request('start_date'));
+        if (request('from_date')) {
+            $query->whereDate('created_at', '>=', request('from_date'));
         }
-        if (request('end_date')) {
-            $query->whereDate('created_at', '<=', request('end_date'));
+        if (request('to_date')) {
+            $query->whereDate('created_at', '<=', request('to_date'));
         }
 
 
@@ -70,6 +75,7 @@ class TaskController extends Controller
      */
     public function store(StoreTaskRequest $request)
     {
+        // dd($request->all());
         $image = $request->file('image') ?? null;
         $validated = $request->validated();
         $validated['created_by'] = Auth::id();
@@ -89,6 +95,7 @@ class TaskController extends Controller
      */
     public function show(Task $task)
     {
+        // dd($task);
         return inertia('Tasks/Show', [
             'task' => new TaskResource($task),
         ]);
@@ -100,9 +107,14 @@ class TaskController extends Controller
     public function edit(Task $task)
     {
 
-        return inertia('Tasks/Edit', [
+        $data = [
             'task' => new TaskResource($task),
-        ]);
+            'users' => UserResource::collection(User::select('name', 'id')->get()),
+            'projects' => ProjectResource::collection(Project::select('name', 'id')->get()),
+        ];
+
+        // dd($data);
+        return inertia('Tasks/Edit', $data);
     }
 
     /**

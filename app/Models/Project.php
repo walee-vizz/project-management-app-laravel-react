@@ -20,9 +20,18 @@ class Project extends Model
         'updated_by',
     ];
 
-    protected $casts = [
-        'due_date' => 'datetime',
-    ];
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'due_date' => 'datetime',
+        ];
+    }
+
 
 
     public function tasks()

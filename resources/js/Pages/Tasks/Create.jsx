@@ -18,13 +18,14 @@ export default function Create({ auth, users, projects }) {
         'status': '',
         'priority': '',
         'assigned_user_id': '',
-        'project_id': '',
+        'project_id': ''
     })
 
     const onSubmit = (e) => {
         e.preventDefault();
-
+        // console.log('data submitted :', data);
         post(route('tasks.store'), data);
+        // console.log('data submitted errors:', errors);
     }
     return (
         <AuthenticatedLayout
@@ -87,28 +88,7 @@ export default function Create({ auth, users, projects }) {
 
                                 {/* <TextInput /> */}
                             </div>
-                            <div className="mt-4">
-                                <InputLabel htmlFor="task_status" value="Task Status" />
-                                <SelectInput
-                                    name="status"
-                                    id="task_status"
-                                    placeholder="Select Status"
-                                    className={`block w-full mt-1 cursor-pointer ${errors.status ? 'border-red-500' : ''}`}
-                                    options={Object.entries(TASK_STATUS_TEXT_MAP).map(([status, text]) => ({
-                                        value: status,
-                                        label: text
-                                    }))}
-                                    onChange={(selectedOption) => setData("status", selectedOption ? selectedOption.value : '')}
-                                />
 
-                                <InputError message={errors.status} className="mt-2" />
-                            </div>
-                            <div className='mt-3'>
-                                <InputLabel htmlFor="due_date" value="Task Deadline" />
-                                <TextInput id="due_date" type="date" name="due_date" value={data.due_date} className={"w-full mt-1 " + (errors.due_date ? 'border-red-500' : '')} onChange={e => setData('due_date', e.target.value)} />
-                                <InputError message={errors.due_date} className='mt-2' />
-
-                            </div>
                             <div className="mt-4">
                                 <InputLabel htmlFor="task_priority" value="Task Priority" />
 
@@ -138,11 +118,30 @@ export default function Create({ auth, users, projects }) {
                                     options={users.data.map(user => ({ value: user.id, label: user.name }))}
                                     onChange={(selectedOption) => setData("assigned_user_id", selectedOption ? selectedOption.value : '')}
                                 />
-
-
                                 <InputError message={errors.assigned_user_id} className="mt-2" />
                             </div>
+                            <div className="mt-4">
+                                <InputLabel htmlFor="task_status" value="Task Status" />
+                                <SelectInput
+                                    name="status"
+                                    id="task_status"
+                                    placeholder="Select Status"
+                                    className={`block w-full mt-1 cursor-pointer ${errors.status ? 'border-red-500' : ''}`}
+                                    options={Object.entries(TASK_STATUS_TEXT_MAP).map(([status, text]) => ({
+                                        value: status,
+                                        label: text
+                                    }))}
+                                    onChange={(selectedOption) => setData("status", selectedOption ? selectedOption.value : '')}
+                                />
 
+                                <InputError message={errors.status} className="mt-2" />
+                            </div>
+                            <div className='mt-3'>
+                                <InputLabel htmlFor="due_date" value="Task Deadline" />
+                                <TextInput id="due_date" type="date" name="due_date" value={data.due_date} className={"w-full mt-1 " + (errors.due_date ? 'border-red-500' : '')} onChange={e => setData('due_date', e.target.value)} />
+                                <InputError message={errors.due_date} className='mt-2' />
+
+                            </div>
                             <div className="mt-4 text-right">
                                 <Link
                                     href={route("tasks.index")}

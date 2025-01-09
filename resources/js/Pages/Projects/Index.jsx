@@ -16,7 +16,18 @@ export default function Index({ auth, sessionParams, projects, queryParams = nul
     const sortDir = queryParams.sortDir || 'DESC';
 
     const searchFieldChanged = async (name, value) => {
-        if (value) {
+        if (name == 'submit' && value == 'submit') {
+            router.get(route('projects.index'), queryParams);
+            return;
+        } else if (name == 'clear' && value == 'clear') {
+            if (queryParams?.page && queryParams.page > 0) {
+                router.get(route('projects.index'), { page: queryParams.page });
+                return;
+            }
+            queryParams = {};
+            router.get(route('projects.index'));
+            return;
+        } else if (value) {
             queryParams[name] = value;
         } else {
             delete queryParams[name];
@@ -78,17 +89,12 @@ export default function Index({ auth, sessionParams, projects, queryParams = nul
                             {/* Search Field */}
                             <div className="flex items-center w-full sm:w-auto">
                                 <label htmlFor="search" className="sr-only">Search</label>
-                                {/* <input
-                                    type="text"
-                                    id="search"
-                                    placeholder="Search by name..."
-                                    className="block w-full px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg sm:w-64 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                                /> */}
+
                                 <TextInput type="text" id="search" placeholder="Search by name..."
-                                    defaultValue={queryParams.name}
+                                    defaultValue={queryParams.search}
                                     className={"block w-full px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg sm:w-64 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"}
-                                    onBlur={e => searchFieldChanged('name', e.target.value)}
-                                    onKeyPress={e => onKeyPress('name', e)}
+                                    onBlur={e => searchFieldChanged('search', e.target.value)}
+                                    onKeyPress={e => onKeyPress('search', e)}
 
                                 />
                             </div>
@@ -96,17 +102,6 @@ export default function Index({ auth, sessionParams, projects, queryParams = nul
                             {/* Filter by Status */}
                             <div className="flex items-center w-full sm:w-auto">
                                 <label htmlFor="status" className="sr-only">Status</label>
-                                {/* <SelectInput id="status" className="block w-full px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer sm:w-48 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                                    defaultValue={queryParams.status}
-                                    onChange={e => searchFieldChanged('status', e.target.value)}
-                                >
-                                    <option value="">All Statuses</option>
-                                    {Object.entries(PROJECT_STATUS_TEXT_MAP).map(([status, text]) => (
-                                        <option key={status} value={status}>
-                                            {text}
-                                        </option>
-                                    ))}
-                                </SelectInput> */}
                                 <SelectInput
                                     name="status"
                                     id="status"
@@ -125,23 +120,23 @@ export default function Index({ auth, sessionParams, projects, queryParams = nul
                             {/* Filter by Date Range */}
                             <div className="flex items-center w-full gap-4 sm:w-auto">
                                 <div>
-                                    <label htmlFor="start-date" className="sr-only">Start Date</label>
-                                    <TextInput type="date" id="start-date" placeholder="Search by name..."
-                                        defaultValue={queryParams.start_date}
+                                    <label htmlFor="from-date" className="sr-only">From Date</label>
+                                    <TextInput type="date" id="from-date"
+                                        defaultValue={queryParams.from_date}
                                         className={"block w-full px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg sm:w-64 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"}
-                                        onBlur={e => searchFieldChanged('start_date', e.target.value)}
-                                        onKeyPress={e => onKeyPress('start_date', e)}
+                                        onBlur={e => searchFieldChanged('from_date', e.target.value)}
+                                        onKeyPress={e => onKeyPress('from_date', e)}
 
                                     />
                                 </div>
                                 <span className="text-gray-500 dark:text-gray-400">to</span>
                                 <div>
-                                    <label htmlFor="end-date" className="sr-only">End Date</label>
-                                    <TextInput type="date" id="end-date" placeholder="Search by name..."
-                                        defaultValue={queryParams.end_date}
+                                    <label htmlFor="to-date" className="sr-only">To Date</label>
+                                    <TextInput type="date" id="to-date"
+                                        defaultValue={queryParams.to_date}
                                         className={"block w-full px-4 py-2 text-sm text-gray-900 border border-gray-300 rounded-lg sm:w-64 bg-gray-50 dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:ring-blue-500 focus:border-blue-500"}
-                                        onBlur={e => searchFieldChanged('end_date', e.target.value)}
-                                        onKeyPress={e => onKeyPress('end_date', e)}
+                                        onBlur={e => searchFieldChanged('to_date', e.target.value)}
+                                        onKeyPress={e => onKeyPress('to_date', e)}
 
                                     />
                                 </div>
@@ -153,6 +148,15 @@ export default function Index({ auth, sessionParams, projects, queryParams = nul
                                 onClick={e => searchFieldChanged('submit', 'submit')}>
                                 Search
                             </Button>
+                            {
+                                queryParams.search || queryParams.from_date || queryParams.to_date || queryParams.status ?
+
+                                    <Button className={"px-4 py-2 text-sm font-sm text-white bg-gray-600 rounded-lg shadow hover:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-gray-500 focus:ring-offset-2 dark:bg-gray-500 dark:hover:bg-gray-600 dark:focus:ring-offset-gray-800"}
+                                        onClick={e => searchFieldChanged('clear', 'clear')}>
+                                        Clear Search
+                                    </Button>
+                                    : null
+                            }
                         </div>
 
                         <div className="relative overflow-x-auto shadow-md sm:rounded-lg">
@@ -160,7 +164,7 @@ export default function Index({ auth, sessionParams, projects, queryParams = nul
                                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
                                         <TableHeading onClick={() => sortBy('id')} sortByField={sortByField} currentField="id" sortDir={sortDir} >
-                                            ID
+                                            Sr. No
                                         </TableHeading>
 
                                         <TableHeading sortable={false} sortByField={sortByField} currentField="id" sortDir={sortDir} >
@@ -179,13 +183,14 @@ export default function Index({ auth, sessionParams, projects, queryParams = nul
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {projects.data.map((project) => (
+                                    {projects.data.map((project, index) => (
                                         <tr className="bg-white border-b dark:bg-gray-800 dark:border-gray-700" key={project.id}>
                                             <td className="px-6 py-4">
-                                                {project.id}
+                                                {/* {project.id} */}
+                                                {index + 1}
                                             </td>
                                             <td className="px-6 py-4">
-                                                <img src={project.image_path} alt={project.name} />
+                                                <img src={project.image_path} alt={project.name} className="w-20 h-20 rounded-half" />
                                             </td>
                                             <th scope="row" className="px-6 py-4 font-medium text-gray-900 hover:underline whitespace-nowrap dark:text-white">
                                                 <Link href={route('projects.show', project.id)} >
@@ -219,7 +224,7 @@ export default function Index({ auth, sessionParams, projects, queryParams = nul
 
                                 </tbody>
                             </table>
-                            <Pagination Links={projects.meta.links} className="mx-auto" />
+                            <Pagination Links={projects.meta.links} className="mx-auto" queryParams={queryParams} />
                         </div>
                     </div>
                 </div>

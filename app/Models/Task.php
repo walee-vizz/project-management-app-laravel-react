@@ -23,7 +23,17 @@ class Task extends Model
         'created_by',
         'updated_by',
     ];
-
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'due_date' => 'datetime',
+        ];
+    }
 
     public function project()
     {

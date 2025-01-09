@@ -86,6 +86,7 @@ export default function Edit({ auth, project }) {
                                     name="status"
                                     id="project_status"
                                     placeholder="Select Status"
+                                    defaultValue={data.status}
                                     className={`block w-full mt-1 cursor-pointer ${errors.status ? 'border-red-500' : ''}`}
                                     options={Object.entries(PROJECT_STATUS_TEXT_MAP).map(([status, text]) => ({
                                         value: status,

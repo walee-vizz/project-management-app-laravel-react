@@ -33,8 +33,6 @@ class StoreTaskRequest extends FormRequest
             'status' => ['required', Rule::in(TaskStatus::getValues())],
             'priority' => ['required', Rule::in(TaskPriority::getValues())],
             'assigned_user_id' => ['required'],
-            'created_by' => ['required'],
-            'updated_by' => ['required'],
         ];
     }
 }
