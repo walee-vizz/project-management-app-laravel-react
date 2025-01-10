@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\DashboardController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -10,13 +11,11 @@ use App\Http\Controllers\UserController;
 
 Route::redirect('/', 'dashboard');
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware(['auth', 'verified'])->group(function () {
 
-    Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    // Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
 
     Route::resource('projects', ProjectController::class);
     Route::get('tasks/my-tasks', [TaskController::class, 'my_tasks'])->name('tasks.my_tasks');

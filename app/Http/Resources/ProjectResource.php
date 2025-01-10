@@ -24,6 +24,7 @@ class ProjectResource extends JsonResource
             'status' => optional($this)->status,
             'created_by' => $this->createdBy ? new UserResource($this->createdBy) : null,
             'updated_by' => $this->updatedBy ? new UserResource($this->updatedBy) : null,
+            'tasks' => $this->tasks ? new TaskResource($this->tasks) : null,
         ];
         if ($this->due_date && !is_string($this->due_date)) {
             $data['due_date'] = $this->due_date->format('Y-m-d');

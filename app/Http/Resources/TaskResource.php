@@ -22,21 +22,21 @@ class TaskResource extends JsonResource
             'name' => optional($this)->name,
             'description' => optional($this)->description,
             'status' => optional($this)->status,
-            'image_path' => $this->image_path ? Storage::url($this->image_path) : null,
+            'image_path' => optional($this)->image_path ? Storage::url($this->image_path) : null,
             'priority' => optional($this)->priority,
-            'project' => $this->project ? new ProjectResource($this->project) : null,
-            'assigned_user' => $this->assignedTo ? new UserResource($this->assignedTo) : null,
-            'created_by' => $this->createdBy ? new UserResource($this->createdBy) : null,
-            'updated_by' => $this->updatedBy ? new UserResource($this->updatedBy) : null,
+            'project' => optional($this)->project ? new ProjectResource($this->project) : null,
+            'assigned_user' => optional($this)->assignedTo ? new UserResource($this->assignedTo) : null,
+            'created_by' => optional($this)->createdBy ? new UserResource($this->createdBy) : null,
+            'updated_by' => optional($this)->updatedBy ? new UserResource($this->updatedBy) : null,
         ];
 
-        if ($this->due_date && !is_string($this->due_date)) {
+        if (optional($this)->due_date && !is_string($this->due_date)) {
             $data['due_date'] = $this->due_date->format('Y-m-d');
         }
-        if ($this->created_at && !is_string($this->created_at)) {
+        if (optional($this)->created_at && !is_string($this->created_at)) {
             $data['created_at'] = $this->created_at->format('Y-m-d');
         }
-        if ($this->updated_at && !is_string($this->updated_at)) {
+        if (optional($this)->updated_at && !is_string($this->updated_at)) {
             $data['updated_at'] = $this->updated_at->format('Y-m-d');
         }
         return $data;
