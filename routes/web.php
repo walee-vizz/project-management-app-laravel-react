@@ -1,13 +1,16 @@
 <?php
 
-use App\Http\Controllers\DashboardController;
+use App\Models\User;
 use Inertia\Inertia;
+use App\Events\SendMessageEvent;
+use App\Http\Controllers\ChatRoomController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ProjectController;
+use App\Http\Controllers\DashboardController;
 
 Route::redirect('/', 'dashboard');
 
@@ -26,6 +29,24 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+});
+
+Route::get('/dispatch/event', function () {
+    $sender = User::find(1);
+    $recipient = User::find(2);
+    // dd($sender, $recipient);
+    broadcast(new SendMessageEvent($sender, $recipient, 'Hello from Laravel Event!'));
+});
+
+Route::controller(ChatRoomController::class)->prefix('chat')->name('chat.')->group(function () {
+
+    Route::get('/', 'index')->name('index');
+    Route::get('/room/create', 'create')->name('room.create');
+    Route::post('/room/store', 'store')->name('room.store');
+    Route::get('room/{room}', [ChatRoomController::class, 'show'])->name('room');
+});
+Route::get('/chat/room', function () {
+    return inertia('Chat/Room');
 });
 
 require __DIR__ . '/auth.php';

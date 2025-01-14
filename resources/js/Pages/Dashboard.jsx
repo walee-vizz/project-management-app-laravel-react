@@ -4,6 +4,11 @@ import { Head } from '@inertiajs/react';
 export default function Dashboard({ auth, projects, tasks }) {
     const { completedTasks, inProgressTasks, pendingTasks, totalTasksCount } = tasks;
     const { pendingProjects, inProgressProjects, completedProjects, totalProjectsCount } = projects;
+
+    Echo.channel('chat').listen('SendMessageEvent', (e) => {
+        console.log('Message Recieved :', e);
+        // Handle the event
+    });
     return (
         <AuthenticatedLayout
             user={auth.user}
