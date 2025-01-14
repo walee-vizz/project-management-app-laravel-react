@@ -2,7 +2,10 @@
 
 namespace App\Events;
 
+use App\Http\Resources\ChatRoomResource;
+use App\Http\Resources\MessageResource;
 use App\Http\Resources\UserResource;
+use App\Models\Message;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PresenceChannel;
@@ -17,27 +20,22 @@ class SendMessageEvent implements ShouldBroadcastNow
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     protected $message;
-    protected $sender;
-    protected $recipient;
+    protected $chatRoom;
     /**
      * Create a new event instance.
      */
-    public function __construct($sender, $recipient, $message)
+    public function __construct(Message $message)
     {
-        $this->sender = $sender;
-        $this->recipient = $recipient;
-        $this->sender = new UserResource($this->sender);
-        $this->recipient = new UserResource($this->recipient);
         $this->message = $message;
+        $this->chatRoom = new ChatRoomResource($message->chatRoom);
     }
 
 
     public function broadcastWith()
     {
         return [
-            'sender' => $this->sender,
-            'recipient' => $this->recipient,
-            'message' => $this->message,
+            'message' => new MessageResource($this->message),
+            'chatRoom' => $this->chatRoom
         ];
     }
 

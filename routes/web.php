@@ -43,7 +43,8 @@ Route::controller(ChatRoomController::class)->prefix('chat')->name('chat.')->gro
     Route::get('/', 'index')->name('index');
     Route::get('/room/create', 'create')->name('room.create');
     Route::post('/room/store', 'store')->name('room.store');
-    Route::get('room/{room}', [ChatRoomController::class, 'show'])->name('room');
+    Route::get('/room/{room}',  'show')->name('room');
+    Route::post('/send-message',  'send_message')->name('send_message');
 });
 Route::get('/chat/room', function () {
     return inertia('Chat/Room');
