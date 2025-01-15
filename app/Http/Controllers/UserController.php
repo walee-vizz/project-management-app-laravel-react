@@ -97,6 +97,8 @@ class UserController extends Controller
         if (!$request->password) {
             unset($validated['password']);
         }
+        $validated['email_verified_at'] = time();
+
         $user->update($validated);
         return redirect()->route('users.show', $user)->with('success', 'User updated successfully');
     }

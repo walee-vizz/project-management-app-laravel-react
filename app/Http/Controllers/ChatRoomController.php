@@ -10,15 +10,18 @@ use Illuminate\Http\Request;
 use App\Events\SendMessageEvent;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Auth;
 use App\Http\Resources\ChatRoomResource;
 
 class ChatRoomController extends Controller
 {
     public function index()
     {
-        $rooms = ChatRoomResource::collection(ChatRoom::all());
+        $rooms = ChatRoom::with('messages', 'participants')->whereHas('participants', function ($q) {
+            $q->where('users.id', Auth::id());
+        })->get();
         $data = [
-            'rooms' => $rooms,
+            'rooms' => ChatRoomResource::collection($rooms),
         ];
         return inertia('Chat/Index', $data);
     }

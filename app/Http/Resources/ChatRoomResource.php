@@ -19,7 +19,11 @@ class ChatRoomResource extends JsonResource
         $data = [
             'id' => $this->id,
             'name' => $this->name,
-            'description' => $this->description,
+            'room_name' => $this->room_name,
+            'room_description' => $this->room_description,
+            'description' => $this?->description ?? '',
+            'last_message_timestamp' => $this?->last_message_timestamp?->format('H:i') ?? '',
+            'type' => $this->type,
             'participants' => UserResource::collection($this->participants),
             'messages' => MessageResource::collection($this->messages),
             'created_at' => $this->created_at,

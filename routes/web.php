@@ -29,6 +29,15 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    Route::controller(ChatRoomController::class)->prefix('chat')->name('chat.')->group(function () {
+
+        Route::get('/', 'index')->name('index');
+        Route::get('/room/create', 'create')->name('room.create');
+        Route::post('/room/store', 'store')->name('room.store');
+        Route::get('/room/{room}',  'show')->name('room');
+        Route::post('/send-message',  'send_message')->name('send_message');
+    });
 });
 
 Route::get('/dispatch/event', function () {
@@ -38,14 +47,7 @@ Route::get('/dispatch/event', function () {
     broadcast(new SendMessageEvent($sender, $recipient, 'Hello from Laravel Event!'));
 });
 
-Route::controller(ChatRoomController::class)->prefix('chat')->name('chat.')->group(function () {
 
-    Route::get('/', 'index')->name('index');
-    Route::get('/room/create', 'create')->name('room.create');
-    Route::post('/room/store', 'store')->name('room.store');
-    Route::get('/room/{room}',  'show')->name('room');
-    Route::post('/send-message',  'send_message')->name('send_message');
-});
 Route::get('/chat/room', function () {
     return inertia('Chat/Room');
 });
