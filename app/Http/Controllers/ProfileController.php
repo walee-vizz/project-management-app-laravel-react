@@ -2,14 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\ProfileUpdateRequest;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
-use Illuminate\Http\RedirectResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Redirect;
+use App\Models\User;
 use Inertia\Inertia;
 use Inertia\Response;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Redirect;
+use App\Http\Requests\ProfileUpdateRequest;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 
 class ProfileController extends Controller
 {
@@ -36,6 +38,36 @@ class ProfileController extends Controller
         }
 
         $request->user()->save();
+
+        return Redirect::route('profile.edit');
+    }
+
+    /**
+     * Update the user's profile information.
+     */
+    public function update_picture(Request $request): RedirectResponse
+    {
+        $validated = $request->validate([
+            'picture' => ['required', 'image', 'max:1024'],
+        ]);
+        $user = Auth::user();
+        $picture = $request->file('picture');
+        $picture_path = $picture->store('users/' . $user->id . '/profile_pictures', 'public');
+        $old_picture = $user->profile_picture;
+
+        if ($old_picture) {
+            Storage::delete('public/' . $old_picture);
+        }
+
+        $user_updated = User::find($user->id)->update([
+            'profile_picture' => $picture_path,
+        ]);
+
+        if ($user_updated) {
+            session()->flash('success', 'Profile picture updated successfully');
+        } else {
+            session()->flash('error', 'Failed to update profile picture');
+        }
 
         return Redirect::route('profile.edit');
     }

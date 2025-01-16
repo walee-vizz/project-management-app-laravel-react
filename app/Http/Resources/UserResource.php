@@ -20,6 +20,7 @@ class UserResource extends JsonResource
             'id' => optional($this)->id,
             'name' => optional($this)->name,
             'email' => optional($this)->email,
+            'profile_picture' => optional($this)->profile_picture_path,
         ];
         if ($this->email_verified_at && !is_string($this->email_verified_at)) {
             $data['email_verified_at'] = $this->email_verified_at->format('Y-m-d');

@@ -11,10 +11,20 @@ export default function Create({ auth, users }) {
 
     const { data, setData, post, errors, reset } = useForm({
         'name': '',
+        'type': '',
         'description': '',
         'participants': '',
     })
-
+    const typeOptions = [
+        {
+            value: 'group',
+            label: 'Group'
+        },
+        {
+            value: 'individual',
+            label: 'Individual'
+        }
+    ];
     const onSubmit = (e) => {
         e.preventDefault();
         console.log('data submitted :', data);
@@ -50,6 +60,18 @@ export default function Create({ auth, users }) {
                                 <InputLabel htmlFor="name" value="Room Name" />
                                 <TextInput id="name" type="text" name="name" value={data.name} className={"w-full mt-1 " + (errors.name ? 'border-red-500' : '')} isFocused={true} onChange={e => setData('name', e.target.value)} />
                                 <InputError message={errors.name} className='mt-2' />
+                            </div>
+                            <div className="mt-4">
+                                <InputLabel htmlFor="type" value="Chat Type" />
+                                <SelectInput
+                                    name="type"
+                                    id="type"
+                                    placeholder="Select Type"
+                                    className={`block w-full mt-1 cursor-pointer ${errors.type ? 'border-red-500' : ''}`}
+                                    options={typeOptions}
+                                    onChange={(selectedOption) => setData("type", selectedOption ? selectedOption.value : '')}
+                                />
+                                <InputError message={errors.type} className="mt-2" />
                             </div>
                             <div className='mt-3'>
                                 <InputLabel htmlFor="room_description" value="Room Description" />

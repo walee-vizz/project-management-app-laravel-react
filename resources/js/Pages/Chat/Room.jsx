@@ -8,7 +8,7 @@ export default function ({ auth, room }) {
     const [messages, setMessages] = useState(room.messages?.length ? room.messages : []);
     const bottomRef = useRef(null);
     const roomType = room.type;
-
+    console.log('Room selected:', room);
     useEffect(() => {
         setMessages(room.messages);
 
@@ -56,8 +56,6 @@ export default function ({ auth, room }) {
     };
 
     return (
-
-
         <div className="flex flex-col justify-between flex-1 h-[100%] w-full px-5">
             <div className="flex justify-between px-2 py-3 border-b-2 border-gray-200 sm:items-center">
                 <div className="relative flex items-center space-x-4">
@@ -67,7 +65,10 @@ export default function ({ auth, room }) {
                                 <circle cx="8" cy="8" r="8" fill="currentColor"></circle>
                             </svg>
                         </span>
-                        {/* <img src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144" alt="" className="w-10 h-10 rounded-full sm:w-16 sm:h-16"> */}
+                        {
+                            room.profile_picture != '' && <img src={room.profile_picture} alt={room.room_name} className="w-10 h-10 rounded-full sm:w-16 sm:h-16" />
+                        }
+
                     </div>
                     <div className="flex flex-col leading-tight">
                         <div className="flex items-center mt-1 text-2xl">
@@ -97,6 +98,7 @@ export default function ({ auth, room }) {
             <div id="messages" ref={bottomRef} className="flex flex-col p-3 space-y-4 overflow-y-auto scrolling-touch scrollbar-thumb-blue scrollbar-thumb-rounded scrollbar-track-blue-lighter scrollbar-w-2">
                 {messages.map((message, index) => {
                     const isLastMessage = index === messages.length - 1; // Check if this is the last message
+                    const senderImage = message?.sender?.profile_picture || "";
                     return (
                         message.sender.id != auth.user.id ?
                             <div className="chat-message" key={message.id}>
@@ -104,7 +106,11 @@ export default function ({ auth, room }) {
                                     <div className="flex flex-col items-start order-2 max-w-xs mx-2 space-y-2 text-xs">
                                         <div><span className="inline-block px-4 py-2 text-gray-600 bg-gray-300 rounded-lg rounded-bl-none">{message.message}</span></div>
                                     </div>
-                                    {/* <img src="https://images.unsplash.com/photo-1549078642-b2ba4bda0cdb?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144" alt="My profile" className="order-1 w-6 h-6 rounded-full"> */}
+                                    {
+                                        senderImage != '' ?
+                                            <img src={senderImage} alt={message.sender.name} className="order-1 w-6 h-6 rounded-full" /> : null
+                                    }
+
                                 </div>
                             </div>
                             :
@@ -113,7 +119,10 @@ export default function ({ auth, room }) {
                                     <div className="flex flex-col items-end order-1 max-w-xs mx-2 space-y-2 text-xs">
                                         <div><span className="inline-block px-4 py-2 text-white bg-blue-600 rounded-lg rounded-br-none ">{message.message}</span></div>
                                     </div>
-                                    {/* <img src="https://images.unsplash.com/photo-1590031905470-a1a1feacbb0b?ixlib=rb-1.2.1&amp;ixid=eyJhcHBfaWQiOjEyMDd9&amp;auto=format&amp;fit=facearea&amp;facepad=3&amp;w=144&amp;h=144" alt="My profile" className="order-2 w-6 h-6 rounded-full"> */}
+                                    {
+                                        senderImage != '' ?
+                                            <img src={senderImage} alt={message.sender.name} className="order-1 w-6 h-6 rounded-full" /> : null
+                                    }
                                 </div>
                             </div>
                     )

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Events\ChatRoomCreatedEvent;
 use Exception;
 use App\Models\User;
 use App\Models\Message;
@@ -17,6 +18,7 @@ class ChatRoomController extends Controller
 {
     public function index()
     {
+        // dd(ChatRoom::all());
         $rooms = ChatRoom::with('messages', 'participants')->whereHas('participants', function ($q) {
             $q->where('users.id', Auth::id());
         })->get();
@@ -38,20 +40,24 @@ class ChatRoomController extends Controller
     {
         $validated = $request->validate([
             'name' => ['required', 'string', 'max:255'],
+            'type' => ['required', 'string', 'in:individual,group'],
             'description' => ['nullable', 'string', 'max:255'],
             'participants' => ['nullable', 'array'],
             'participants.*' => ['integer', 'exists:users,id'], // Validate each participant ID
         ]);
         try {
+            $validated['participants'][] = Auth::id();
             // dd($validated);
             $room = ChatRoom::create($validated);
             if ($room) {
                 $room->participants()->sync($validated['participants'] ?? []); // Sync participants with the chat room
-                return redirect()->route('chat.room', $room);
+                broadcast(new ChatRoomCreatedEvent($room));
+                return redirect()->route('chat.index', $room);
             } else {
                 return redirect()->back()->withErrors(['Error creating room']);
             }
         } catch (Exception $e) {
+            // dd($e);
             // Log the error for debugging purposes
             Log::error('Error occured while creating a chat room : ' . $e->getMessage());
             return redirect()->route('chat.index')->with('error', 'An error occurred while creating the chat room. Please try again.');

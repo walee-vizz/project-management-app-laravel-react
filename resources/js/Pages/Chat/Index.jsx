@@ -5,19 +5,47 @@ import TextInput from '@/Components/TextInput';
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
 import { Button } from '@headlessui/react';
 import { Head, Link, router } from '@inertiajs/react';
-import { useState, } from 'react';
+import { useState, useEffect } from 'react';
 import Room from './Room';
 
-export default function Index({ auth, sessionParams, rooms, queryParams = null, session = null }) {
+export default function Index({ auth, sessionParams, rooms: initialRooms, queryParams = null, session = null }) {
+
+
+    // console.log('rooms fetched :', initialRooms);
+    const [rooms, setRooms] = useState(initialRooms?.data?.length ? initialRooms?.data : []);
+    // console.log('rooms fetched 2 :', rooms);
 
     sessionParams = sessionParams || {};
     queryParams = queryParams || {};
-    // console.log('rooms fetched :', rooms);
-    // console.log('rooms to be selected :', rooms.data[1]);
+    // console.log('rooms to be selected :', rooms[1]);
     const sortByField = queryParams.sortBy || 'created_at';
     const sortDir = queryParams.sortDir || 'DESC';
     const [selectedRoom, setSelectedRoom] = useState(null);
     // console.log('rooms selected :', selectedRoom);
+    useEffect(() => {
+        setRooms(rooms);
+        const channel = Echo.channel('chat');
+
+        channel.listen('ChatRoomCreatedEvent', (e) => {
+            console.log('New Room Created :', e);
+
+            const chatParticipants = e.chatRoom?.participants || [];
+            const thisUserExist = chatParticipants.some(participant => participant.id === auth.user.id);
+
+            if (thisUserExist) {
+                setRooms(prevRooms => [...prevRooms, e.chatRoom]);
+
+                // if (bottomRef.current) {
+                //     bottomRef.current.scrollTop = bottomRef.current.scrollHeight + 10;
+                // }
+            }
+        });
+
+        return () => {
+            channel.stopListening('ChatRoomCreatedEvent');
+        };
+    }, [auth.user.id]);
+
 
     const searchFieldChanged = async (name, value) => {
         console.log('Search field changed :' + name + ' -> ' + value);
@@ -75,7 +103,7 @@ export default function Index({ auth, sessionParams, rooms, queryParams = null, 
                                     <TextInput type="text" className="w-full h-12 px-3 rounded focus:outline-none focus:shadow-md" placeholder="Search..." />
                                     <i className="absolute text-gray-300 fa fa-search right-3 top-4"></i> </div>
                                 <ul>
-                                    {rooms.data.map((room, index) => {
+                                    {rooms.map((room, index) => {
 
                                         return (
                                             <li onClick={e => { setSelectedRoom(room) }} key={room.id} className="flex items-center justify-between p-2 mt-2 transition bg-white rounded cursor-pointer hover:shadow-lg">

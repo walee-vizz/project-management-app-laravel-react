@@ -11,6 +11,7 @@ use App\Http\Controllers\UserController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\DashboardController;
+use Illuminate\Auth\Middleware\Authenticate;
 
 Route::redirect('/', 'dashboard');
 
@@ -24,10 +25,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('tasks/my-tasks', [TaskController::class, 'my_tasks'])->name('tasks.my_tasks');
     Route::resource('tasks', TaskController::class);
     Route::resource('users', UserController::class);
-});
-Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+
+    Route::post('/profile-picture', [ProfileController::class, 'update_picture'])->name('profile.update_picture');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::controller(ChatRoomController::class)->prefix('chat')->name('chat.')->group(function () {
@@ -38,18 +39,18 @@ Route::middleware('auth')->group(function () {
         Route::get('/room/{room}',  'show')->name('room');
         Route::post('/send-message',  'send_message')->name('send_message');
     });
-});
 
-Route::get('/dispatch/event', function () {
-    $sender = User::find(1);
-    $recipient = User::find(2);
-    // dd($sender, $recipient);
-    broadcast(new SendMessageEvent($sender, $recipient, 'Hello from Laravel Event!'));
-});
+    Route::get('/dispatch/event', function () {
+        $sender = User::find(1);
+        $recipient = User::find(2);
+        // dd($sender, $recipient);
+        broadcast(new SendMessageEvent($sender, $recipient, 'Hello from Laravel Event!'));
+    });
 
 
-Route::get('/chat/room', function () {
-    return inertia('Chat/Room');
+    Route::get('/chat/room', function () {
+        return inertia('Chat/Room');
+    });
 });
 
 require __DIR__ . '/auth.php';

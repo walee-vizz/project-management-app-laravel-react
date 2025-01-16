@@ -11,7 +11,8 @@ class ChatRoom extends Model
     protected $fillable = [
         'name',
         'description',
-        'type'
+        'type',
+        'profile_picture',
     ];
 
     public function getRoomNameAttribute()
@@ -21,6 +22,16 @@ class ChatRoom extends Model
             return $participant->name ?? $this->name;
         } else {
             return $this->name;
+        }
+    }
+
+    public function getProfilePicturePathAttribute()
+    {
+        if ($this->type == 'group') {
+            return $this->profile_picture;
+        } elseif ($this->type == 'individual') {
+            $participant = $this->participants()->where('users.id', '!=', Auth::id())->first();
+            return $participant?->id ? $participant?->profile_picture_path : $this->profile_picture;
         }
     }
     public function getRoomDescriptionAttribute()
