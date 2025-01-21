@@ -8,7 +8,7 @@ export default function ({ auth, room }) {
     const [messages, setMessages] = useState(room.messages?.length ? room.messages : []);
     const bottomRef = useRef(null);
     const roomType = room.type;
-    console.log('Room selected:', room);
+    // console.log('Room selected:', room);
     useEffect(() => {
         setMessages(room.messages);
 

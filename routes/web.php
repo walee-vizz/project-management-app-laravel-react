@@ -3,6 +3,7 @@
 use App\Models\User;
 use Inertia\Inertia;
 use App\Events\SendMessageEvent;
+use App\Http\Controllers\Async\AsyncController;
 use App\Http\Controllers\ChatRoomController;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -25,15 +26,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('tasks/my-tasks', [TaskController::class, 'my_tasks'])->name('tasks.my_tasks');
     Route::resource('tasks', TaskController::class);
     Route::resource('users', UserController::class);
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
 
-    Route::post('/profile-picture', [ProfileController::class, 'update_picture'])->name('profile.update_picture');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::controller(ProfileController::class)->prefix('profile')->name('profile.')->group(function () {
+        Route::get('/', 'edit')->name('edit');
+        Route::patch('/', 'update')->name('update');
+        Route::post('/profile-picture', 'update_picture')->name('update_picture');
+        Route::delete('/', 'destroy')->name('destroy');
+    });
 
     Route::controller(ChatRoomController::class)->prefix('chat')->name('chat.')->group(function () {
 
         Route::get('/', 'index')->name('index');
+        Route::get('/get-chat-rooms', 'get_chat_rooms')->name('get_chat_rooms');
         Route::get('/room/create', 'create')->name('room.create');
         Route::post('/room/store', 'store')->name('room.store');
         Route::get('/room/{room}',  'show')->name('room');
@@ -51,6 +55,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/chat/room', function () {
         return inertia('Chat/Room');
     });
+});
+
+
+Route::controller(AsyncController::class)->prefix('async')->name('async.')->group(function () {
+
+    Route::get('/users', 'get_users')->name('get_users');
 });
 
 require __DIR__ . '/auth.php';

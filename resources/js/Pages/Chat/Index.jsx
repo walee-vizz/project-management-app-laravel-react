@@ -7,37 +7,54 @@ import { Button } from '@headlessui/react';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import Room from './Room';
-
+import ChatButton from '@/Components/ChatButton';
 export default function Index({ auth, sessionParams, rooms: initialRooms, queryParams = null, session = null }) {
 
 
-    // console.log('rooms fetched :', initialRooms);
     const [rooms, setRooms] = useState(initialRooms?.data?.length ? initialRooms?.data : []);
-    // console.log('rooms fetched 2 :', rooms);
-
-    sessionParams = sessionParams || {};
-    queryParams = queryParams || {};
-    // console.log('rooms to be selected :', rooms[1]);
     const sortByField = queryParams.sortBy || 'created_at';
     const sortDir = queryParams.sortDir || 'DESC';
     const [selectedRoom, setSelectedRoom] = useState(null);
-    // console.log('rooms selected :', selectedRoom);
+
+    const updateURLParam = (key, value) => {
+        const searchParams = new URLSearchParams(window.location.search);
+        searchParams.set(key, value);
+        const newRelativePathQuery = `${window.location.pathname}?${searchParams.toString()}`;
+        window.history.pushState(null, '', newRelativePathQuery);
+    };
     useEffect(() => {
-        setRooms(rooms);
+        if (queryParams?.chat && rooms.length > 0) {
+            // console.log('room param :', queryParams?.chat);
+            const room = rooms.find(room => room.id == queryParams?.chat);
+            if (room) {
+                // console.log('room param found:', room);
+
+                setSelectedRoom(room);
+                // router.get(route('chat.index', queryParams));
+
+            }
+        }
+    }, [queryParams, rooms]);
+
+    useEffect(() => {
+
+        if (selectedRoom?.id) {
+            queryParams.chat = selectedRoom?.id;
+            updateURLParam('chat', selectedRoom?.id);
+        } else {
+
+        }
+    }, [selectedRoom?.id]);
+
+    useEffect(() => {
         const channel = Echo.channel('chat');
 
         channel.listen('ChatRoomCreatedEvent', (e) => {
-            console.log('New Room Created :', e);
-
             const chatParticipants = e.chatRoom?.participants || [];
             const thisUserExist = chatParticipants.some(participant => participant.id === auth.user.id);
 
             if (thisUserExist) {
                 setRooms(prevRooms => [...prevRooms, e.chatRoom]);
-
-                // if (bottomRef.current) {
-                //     bottomRef.current.scrollTop = bottomRef.current.scrollHeight + 10;
-                // }
             }
         });
 
@@ -48,27 +65,31 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
 
 
     const searchFieldChanged = async (name, value) => {
-        console.log('Search field changed :' + name + ' -> ' + value);
-        if (name == 'submit' && value == 'submit') {
-            router.get(route('rooms.index'), queryParams);
+        if (name === 'submit' && value === 'submit') {
+            router.get(route('chat.index'), queryParams);
             return;
-        } else if (name == 'clear' && value == 'clear') {
+        } else if (name === 'clear' && value === 'clear') {
             if (queryParams?.page && queryParams.page > 0) {
-                router.get(route('rooms.index'), { page: queryParams.page });
+                router.get(route('chat.index'), { page: queryParams.page });
                 return;
             }
             queryParams = {};
-            router.get(route('rooms.index'));
+            router.get(route('chat.index'));
             return;
         } else if (value) {
             queryParams[name] = value;
         } else {
             delete queryParams[name];
         }
-        router.get(route('rooms.index', queryParams));
+
+        router.get(route('chat.index', queryParams));
     };
 
-
+    const onKeyPress = async (name, e) => {
+        if (e.key === 'Enter') {
+            searchFieldChanged(name, e.target.value);
+        }
+    };
 
 
     return (
@@ -96,12 +117,16 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
                 {/* <!-- Chatting --> */}
                 <div className="flex flex-row justify-between bg-white h-[100%]">
                     {/* <!-- chat list --> */}
-                    <div className="w-2/5 max-w-md mx-auto overflow-hidden bg-gray-100 rounded-lg shadow-lg md:max-w-lg h-[100%]">
-                        <div className="md:flex">
+                    <div className="w-2/5 max-w-md mx-auto  bg-gray-100 rounded-lg shadow-lg md:max-w-lg h-[100%]">
+                        <div className="overflow-auto md:flex h-[100%]">
                             <div className="w-full p-4">
-                                <div className="relative">
-                                    <TextInput type="text" className="w-full h-12 px-3 rounded focus:outline-none focus:shadow-md" placeholder="Search..." />
-                                    <i className="absolute text-gray-300 fa fa-search right-3 top-4"></i> </div>
+                                <div className="sticky top-0">
+                                    <TextInput type="text" defaultValue={queryParams?.search || ''}
+                                        isFocused={false}
+                                        onKeyPress={e => onKeyPress('search', e)}
+                                        className="w-full h-12 px-3 rounded focus:outline-none focus:shadow-md" placeholder="Search..." />
+                                    <i className="absolute text-gray-300 fa fa-search right-3 top-4"></i>
+                                </div>
                                 <ul>
                                     {rooms.map((room, index) => {
 
@@ -120,6 +145,7 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
                                 </ul>
                             </div>
                         </div>
+                        <ChatButton />
                     </div>
                     {/* <!-- end chat list --> */}
                     {

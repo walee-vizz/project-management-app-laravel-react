@@ -19,13 +19,78 @@ class ChatRoomController extends Controller
     public function index()
     {
         // dd(ChatRoom::all());
-        $rooms = ChatRoom::with('messages', 'participants')->whereHas('participants', function ($q) {
-            $q->where('users.id', Auth::id());
-        })->get();
+        $query = ChatRoom::query();
+        // $sort_by = request('sortBy', 'created_at');
+        // $sort_dir = request('sortDir', 'DESC');
+
+
+        // if (request('search')) {
+        $query->where(function ($q) {
+            if (request('search')) {
+                $q->where('name', 'like', '%' . request('search') . '%')
+                    ->orWhereHas('messages', function ($q) {
+                        $q->where('message', 'like', '%' . request('search') . '%');
+                    })
+                    ->orWhereHas('participants', function ($q) {
+                        $q->where('users.id', '!=', Auth::id());
+                        $q->where('name', 'like', '%' . request('search') . '%');
+                    });
+            }
+        });
+        // }
+
+        if (request('from_date')) {
+            $query->whereDate('created_at', '>=', request('from_date'));
+        }
+        if (request('to_date')) {
+            $query->whereDate('created_at', '<=', request('to_date'));
+        }
+        session()->forget('success');
+
+        // request()->session()->flush();
+        // Session::put('error', 'Error');
+        $rooms = $query
+            // ->orderBy($sort_by, $sort_dir)
+            ->get();
+        // ->paginate(15)->onEachSide(1);
         $data = [
             'rooms' => ChatRoomResource::collection($rooms),
+            'queryParams' => request()->query() ?: null,
+
         ];
         return inertia('Chat/Index', $data);
+    }
+    public function get_chat_rooms()
+    {
+        $query = ChatRoom::query();
+        $sort_by = request('sortBy', 'created_at');
+        $sort_dir = request('sortDir', 'DESC');
+
+
+        if (request('search')) {
+            $query->where('name', 'like', '%' . request('search') . '%');
+        }
+
+        if (request('from_date')) {
+            $query->whereDate('created_at', '>=', request('from_date'));
+        }
+        if (request('to_date')) {
+            $query->whereDate('created_at', '<=', request('to_date'));
+        }
+        session()->forget('success');
+
+        // request()->session()->flush();
+        // Session::put('error', 'Error');
+        $rooms = $query->orderBy($sort_by, $sort_dir)
+            ->get();
+        // ->paginate(15)->onEachSide(1);
+        $data = [
+            'rooms' => ChatRoomResource::collection($rooms),
+            'queryParams' => request()->query() ?: null,
+
+        ];
+        // return response()->json($data);
+        return inertia("rooms/Index", $data);
     }
 
     public function create()
