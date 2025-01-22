@@ -8,12 +8,11 @@ import { Head, Link, router } from '@inertiajs/react';
 import { useState, useEffect } from 'react';
 import Room from './Room';
 import ChatButton from '@/Components/ChatButton';
+import ChatRoomList from '@/Components/Chat/ChatRoomList';
 export default function Index({ auth, sessionParams, rooms: initialRooms, queryParams = null, session = null }) {
 
 
     const [rooms, setRooms] = useState(initialRooms?.data?.length ? initialRooms?.data : []);
-    const sortByField = queryParams.sortBy || 'created_at';
-    const sortDir = queryParams.sortDir || 'DESC';
     const [selectedRoom, setSelectedRoom] = useState(null);
 
     const updateURLParam = (key, value) => {
@@ -34,6 +33,7 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
 
             }
         }
+        console.log('query updated :', queryParams);
     }, [queryParams, rooms]);
 
     useEffect(() => {
@@ -46,50 +46,7 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
         }
     }, [selectedRoom?.id]);
 
-    useEffect(() => {
-        const channel = Echo.channel('chat');
 
-        channel.listen('ChatRoomCreatedEvent', (e) => {
-            const chatParticipants = e.chatRoom?.participants || [];
-            const thisUserExist = chatParticipants.some(participant => participant.id === auth.user.id);
-
-            if (thisUserExist) {
-                setRooms(prevRooms => [...prevRooms, e.chatRoom]);
-            }
-        });
-
-        return () => {
-            channel.stopListening('ChatRoomCreatedEvent');
-        };
-    }, [auth.user.id]);
-
-
-    const searchFieldChanged = async (name, value) => {
-        if (name === 'submit' && value === 'submit') {
-            router.get(route('chat.index'), queryParams);
-            return;
-        } else if (name === 'clear' && value === 'clear') {
-            if (queryParams?.page && queryParams.page > 0) {
-                router.get(route('chat.index'), { page: queryParams.page });
-                return;
-            }
-            queryParams = {};
-            router.get(route('chat.index'));
-            return;
-        } else if (value) {
-            queryParams[name] = value;
-        } else {
-            delete queryParams[name];
-        }
-
-        router.get(route('chat.index', queryParams));
-    };
-
-    const onKeyPress = async (name, e) => {
-        if (e.key === 'Enter') {
-            searchFieldChanged(name, e.target.value);
-        }
-    };
 
 
     return (
@@ -117,7 +74,7 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
                 {/* <!-- Chatting --> */}
                 <div className="flex flex-row justify-between bg-white h-[100%]">
                     {/* <!-- chat list --> */}
-                    <div className="w-2/5 max-w-md mx-auto  bg-gray-100 rounded-lg shadow-lg md:max-w-lg h-[100%]">
+                    {/* <div className="w-2/5 max-w-md mx-auto  bg-gray-100 rounded-lg shadow-lg md:max-w-lg h-[100%]">
                         <div className="overflow-auto md:flex h-[100%]">
                             <div className="w-full p-4">
                                 <div className="sticky top-0">
@@ -133,7 +90,6 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
                                         return (
                                             <li onClick={e => { setSelectedRoom(room) }} key={room.id} className="flex items-center justify-between p-2 mt-2 transition bg-white rounded cursor-pointer hover:shadow-lg">
                                                 <div className="flex ml-2">
-                                                    {/* <img src="https://i.imgur.com/aq39RMA.jpg" width="40" height="40" className="rounded-full"> */}
                                                     <div className="flex flex-col ml-2"> <span className="font-medium text-black">{room.room_name}</span> <span className="w-32 text-sm text-gray-400 truncate">{room.messages?.length > 0 ? room.messages[room.messages?.length - 1].message : room.description}</span> </div>
                                                 </div>
                                                 <div className="flex flex-col items-center"> <span className="text-gray-300">{room.last_message_timestamp}</span> <i className="text-green-400 fa fa-star"></i> </div>
@@ -146,7 +102,8 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
                             </div>
                         </div>
                         <ChatButton />
-                    </div>
+                    </div> */}
+                    <ChatRoomList withSearch={true} user={auth.user} auth={auth} onSelection={(val) => { setSelectedRoom(val) }} />
                     {/* <!-- end chat list --> */}
                     {
                         selectedRoom?.id ? <Room room={selectedRoom} auth={auth} /> : <div className='w-full px-5'></div>

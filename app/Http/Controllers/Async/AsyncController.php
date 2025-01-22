@@ -3,9 +3,12 @@
 namespace App\Http\Controllers\Async;
 
 use App\Models\User;
+use App\Models\ChatRoom;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\ChatRoomResource;
 use App\Http\Resources\UserResource;
+use Illuminate\Support\Facades\Auth;
 
 class AsyncController extends Controller
 {
@@ -13,5 +16,32 @@ class AsyncController extends Controller
     {
         $users = UserResource::collection(User::all(['id', 'name'])); // Fetch only the necessary fields
         return response()->json($users);
+    }
+
+    public function get_user_chat_rooms(Request $request)
+    {
+        $user_id = $request->user_id;
+        $search = $request->search;
+        // $rooms = ChatRoom::with('messages', 'participants')->whereHas('participants', function ($q) {
+        //     $q->where('users.id', Auth::id());
+        // })->get();
+        $query = ChatRoom::query();
+
+        $query->where(function ($q) use ($search) {
+            if ($search) {
+                $q->where('name', 'like', '%' . $search . '%')
+                    ->orWhereHas('messages', function ($q) use ($search) {
+                        $q->where('message', 'like', '%' . $search . '%');
+                    })
+                    ->orWhereHas('participants', function ($q) use ($search) {
+                        $q->where('name', 'like', '%' . $search . '%');
+                    });
+            }
+        });
+        $rooms = $query
+            // ->orderBy($sort_by, $sort_dir)
+            ->get();
+        $rooms = ChatRoomResource::collection($rooms);
+        return response()->json($rooms);
     }
 }

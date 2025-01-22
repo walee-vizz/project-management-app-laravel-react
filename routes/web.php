@@ -61,6 +61,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::controller(AsyncController::class)->prefix('async')->name('async.')->group(function () {
 
     Route::get('/users', 'get_users')->name('get_users');
+    Route::get('/user/chats', 'get_user_chat_rooms')->name('get_user_chat_rooms');
 });
 
 require __DIR__ . '/auth.php';

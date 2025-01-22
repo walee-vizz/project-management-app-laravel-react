@@ -16,8 +16,9 @@ use App\Http\Resources\ChatRoomResource;
 
 class ChatRoomController extends Controller
 {
-    public function index()
+    public function get_chat_rooms(Request $request)
     {
+        // dd(request('sortBy', 'created_at'), request()->query());
         // dd(ChatRoom::all());
         $query = ChatRoom::query();
         // $sort_by = request('sortBy', 'created_at');
@@ -60,7 +61,7 @@ class ChatRoomController extends Controller
         ];
         return inertia('Chat/Index', $data);
     }
-    public function get_chat_rooms()
+    public function index()
     {
         $query = ChatRoom::query();
         $sort_by = request('sortBy', 'created_at');
@@ -86,11 +87,10 @@ class ChatRoomController extends Controller
         // ->paginate(15)->onEachSide(1);
         $data = [
             'rooms' => ChatRoomResource::collection($rooms),
-            'queryParams' => request()->query() ?: null,
+            'queryParams' => request()->query() ?: ['tt' => ''],
 
         ];
-        // return response()->json($data);
-        return inertia("rooms/Index", $data);
+        return inertia('Chat/Index', $data);
     }
 
     public function create()

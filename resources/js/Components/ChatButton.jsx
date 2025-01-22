@@ -11,9 +11,9 @@ export default function ChatButton() {
     };
 
     return (
-        <div className="relative">
+        <div className="sticky bottom-0 flex justify-end">
             <button
-                className="absolute bottom-[20px] right-[21px] p-3 text-white bg-blue-500 rounded-full shadow-lg hover:bg-blue-600"
+                className="p-3 text-white bg-blue-500 rounded-full shadow-lg hover:bg-blue-600"
                 onClick={() => setShowOptions(!showOptions)}
             >
                 Chat
