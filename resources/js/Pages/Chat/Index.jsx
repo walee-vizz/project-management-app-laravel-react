@@ -103,7 +103,7 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
                         </div>
                         <ChatButton />
                     </div> */}
-                    <ChatRoomList withSearch={true} user={auth.user} auth={auth} onSelection={(val) => { setSelectedRoom(val) }} />
+                    <ChatRoomList className="w-[25%]" withSearch={true} user={auth.user} auth={auth} onSelection={(val) => { setSelectedRoom(val) }} />
                     {/* <!-- end chat list --> */}
                     {
                         selectedRoom?.id ? <Room room={selectedRoom} auth={auth} /> : <div className='w-full px-5'></div>

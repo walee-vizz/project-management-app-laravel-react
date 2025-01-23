@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import MessageComposer from '@/Components/MessageComposer'; // Import your MessageComposer component
 
-export default function ChatButton() {
+export default function ChatButton({ className }) {
     const [showOptions, setShowOptions] = useState(false);
     const [chatType, setChatType] = useState(null);
 
@@ -11,7 +11,7 @@ export default function ChatButton() {
     };
 
     return (
-        <div className="sticky bottom-0 flex justify-end">
+        <div className={"sticky bottom-3 flex justify-end " + className}>
             <button
                 className="p-3 text-white bg-blue-500 rounded-full shadow-lg hover:bg-blue-600"
                 onClick={() => setShowOptions(!showOptions)}

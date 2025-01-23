@@ -27,7 +27,7 @@ class AsyncController extends Controller
         // })->get();
         $query = ChatRoom::query();
 
-        $query->where(function ($q) use ($search) {
+        $query->where(function ($q) use ($search, $user_id) {
             if ($search) {
                 $q->where('name', 'like', '%' . $search . '%')
                     ->orWhereHas('messages', function ($q) use ($search) {
@@ -36,6 +36,11 @@ class AsyncController extends Controller
                     ->orWhereHas('participants', function ($q) use ($search) {
                         $q->where('name', 'like', '%' . $search . '%');
                     });
+            }
+            if ($user_id) {
+                $q->whereHas('participants', function ($q) use ($user_id) {
+                    $q->where('users.id', $user_id);
+                });
             }
         });
         $rooms = $query

@@ -1,15 +1,15 @@
 import Alert from '@/Components/Alert';
 import Pagination from '@/Components/Pagination';
 import TextInput from '@/Components/TextInput';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import ChatButton from '@/Components/ChatButton';
-export default function ChatRoomList({ auth, user, withSearch = false, onSelection }) {
-
+import debounce from "lodash/debounce"
+export default function ChatRoomList({ auth, user, withSearch = false, onSelection, className }) {
 
     const currentUserId = user?.id ? user.id : auth?.user?.id;
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState(null);
-    const [search, setSearch] = useState('');
+    const [search, setSearch] = useState(null);
     const fetchRooms = async (userId = currentUserId, searchQuery = null) => {
         try {
             let payload = {
@@ -17,6 +17,8 @@ export default function ChatRoomList({ auth, user, withSearch = false, onSelecti
             }
             if (searchQuery) {
                 payload.search = searchQuery;
+            } else {
+                payload.search = ''
             }
             const response = await axios.get(route('async.get_user_chat_rooms'), {
                 params: payload,
@@ -56,6 +58,25 @@ export default function ChatRoomList({ auth, user, withSearch = false, onSelecti
     }, [auth.user.id]);
 
 
+    // Debounced version of fetchRooms
+    const debouncedFetchRooms = useCallback(
+        debounce((userId, searchQuery) => {
+            fetchRooms(userId, searchQuery);
+        }, 300), // 300ms debounce
+        []
+    );
+
+    useEffect(() => {
+        if (search) {
+            debouncedFetchRooms(currentUserId, search);
+        }
+
+        // Clean up the debounce function on unmount
+        return () => {
+            debouncedFetchRooms.cancel();
+        };
+    }, [search, currentUserId, debouncedFetchRooms]);
+
     const searchChatRooms = async (value = '') => {
         if (value) {
             fetchRooms(currentUserId, value);
@@ -72,8 +93,8 @@ export default function ChatRoomList({ auth, user, withSearch = false, onSelecti
 
 
     return (
-        <div className="overflow-auto h-[100%] relative" >
-            <div className="w-full p-4 ">
+        <div className={"overflow-auto h-[100 %] relative " + className} >
+            < div className="w-full p-4 " >
                 {
                     withSearch && (
                         <div className="sticky top-0">
@@ -102,8 +123,8 @@ export default function ChatRoomList({ auth, user, withSearch = false, onSelecti
                     })}
 
                 </ul>
-            </div>
+            </div >
             <ChatButton />
-        </div>
+        </div >
     );
 }
