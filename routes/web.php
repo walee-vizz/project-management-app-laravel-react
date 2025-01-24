@@ -17,9 +17,10 @@ use Illuminate\Auth\Middleware\Authenticate;
 Route::redirect('/', 'dashboard');
 
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth'])->group(function () {
 
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
+    Route::get('/dashboard-new', [DashboardController::class, 'index_new'])->name('dashboard_new');
     // Route::get('/dashboard', fn() => Inertia::render('Dashboard'))->name('dashboard');
 
     Route::resource('projects', ProjectController::class);

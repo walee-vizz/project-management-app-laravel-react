@@ -1,206 +1,160 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
-import Dropdown from '@/Components/Dropdown';
-import NavLink from '@/Components/NavLink';
-import ResponsiveNavLink from '@/Components/ResponsiveNavLink';
-import { Link, usePage } from '@inertiajs/react';
-import { useState } from 'react';
+/* eslint-disable react-hooks/exhaustive-deps */
+import {
+    useEventListener,
+    useMountEffect,
+    useUnmountEffect,
+} from "primereact/hooks";
+import React, { useContext, useEffect, useRef } from "react";
+import { classNames } from "primereact/utils";
+import AppFooter from "@/Layouts/AppFooter.jsx";
+import AppSidebar from "@/Layouts/AppSidebar.jsx";
+import AppTopbar from "@/Layouts/AppTopbar.jsx";
+import AppConfig from "@/Layouts/AppConfig.jsx";
+import { LayoutContext } from "./context/layoutcontext";
+import { PrimeReactContext } from "primereact/api";
+// import { usePathname, useSearchParams } from "next/navigation";
+const AuthenticatedLayout = ({ children }) => {
+    PrimeReactContext.ripple = true;
+    const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
+    const { setRipple } = useContext(PrimeReactContext);
+    const topbarRef = useRef(null);
+    const sidebarRef = useRef(null);
 
-export default function AuthenticatedLayout({ header, children }) {
-    const user = usePage().props.auth.user;
+    const [bindMenuOutsideClickListener, unbindMenuOutsideClickListener] =
+        useEventListener({
+            type: "click",
+            listener: (event) => {
+                const isOutsideClicked = !(
+                    sidebarRef.current?.isSameNode(event.target) ||
+                    sidebarRef.current?.contains(event.target) ||
+                    topbarRef.current?.menubutton?.isSameNode(event.target) ||
+                    topbarRef.current?.menubutton?.contains(event.target)
+                );
 
-    const [showingNavigationDropdown, setShowingNavigationDropdown] =
-        useState(false);
+                if (isOutsideClicked) {
+                    hideMenu();
+                }
+            },
+        });
+
+    const pathname = route().current();
+    // const searchParams = useSearchParams();
+    useEffect(() => {
+        hideMenu();
+        hideProfileMenu();
+    }, [pathname]);
+
+    const [
+        bindProfileMenuOutsideClickListener,
+        unbindProfileMenuOutsideClickListener,
+    ] = useEventListener({
+        type: "click",
+        listener: (event) => {
+            const isOutsideClicked = !(
+                topbarRef.current?.topbarmenu?.isSameNode(event.target) ||
+                topbarRef.current?.topbarmenu?.contains(event.target) ||
+                topbarRef.current?.topbarmenubutton?.isSameNode(event.target) ||
+                topbarRef.current?.topbarmenubutton?.contains(event.target)
+            );
+
+            if (isOutsideClicked) {
+                hideProfileMenu();
+            }
+        },
+    });
+
+    const hideMenu = () => {
+        setLayoutState((prevLayoutState) => ({
+            ...prevLayoutState,
+            overlayMenuActive: false,
+            staticMenuMobileActive: false,
+            menuHoverActive: false,
+        }));
+        unbindMenuOutsideClickListener();
+        unblockBodyScroll();
+    };
+
+    const hideProfileMenu = () => {
+        setLayoutState((prevLayoutState) => ({
+            ...prevLayoutState,
+            profileSidebarVisible: false,
+        }));
+        unbindProfileMenuOutsideClickListener();
+    };
+
+    const blockBodyScroll = () => {
+        if (document.body.classList) {
+            document.body.classList.add("blocked-scroll");
+        } else {
+            document.body.className += " blocked-scroll";
+        }
+    };
+
+    const unblockBodyScroll = () => {
+        if (document.body.classList) {
+            document.body.classList.remove("blocked-scroll");
+        } else {
+            document.body.className = document.body.className.replace(
+                new RegExp(
+                    "(^|\\b)" + "blocked-scroll".split(" ").join("|") + "(\\b|$)",
+                    "gi"
+                ),
+                " "
+            );
+        }
+    };
+
+    useMountEffect(() => {
+        setRipple(layoutConfig.ripple);
+    });
+
+    useEffect(() => {
+        if (layoutState.overlayMenuActive || layoutState.staticMenuMobileActive) {
+            bindMenuOutsideClickListener();
+        }
+
+        layoutState.staticMenuMobileActive && blockBodyScroll();
+    }, [layoutState.overlayMenuActive, layoutState.staticMenuMobileActive]);
+
+    useEffect(() => {
+        if (layoutState.profileSidebarVisible) {
+            bindProfileMenuOutsideClickListener();
+        }
+    }, [layoutState.profileSidebarVisible]);
+
+    useUnmountEffect(() => {
+        unbindMenuOutsideClickListener();
+        unbindProfileMenuOutsideClickListener();
+    });
+
+    const containerClass = classNames("layout-wrapper", {
+        "layout-overlay": layoutConfig.menuMode === "overlay",
+        "layout-static": layoutConfig.menuMode === "static",
+        "layout-static-inactive":
+            layoutState.staticMenuDesktopInactive &&
+            layoutConfig.menuMode === "static",
+        "layout-overlay-active": layoutState.overlayMenuActive,
+        "layout-mobile-active": layoutState.staticMenuMobileActive,
+        "p-input-filled": layoutConfig.inputStyle === "filled",
+        "p-ripple-disabled": !layoutConfig.ripple,
+    });
 
     return (
-        <div className="min-h-screen bg-gray-100">
-            <nav className="bg-white border-b border-gray-100">
-                <div className="px-4 mx-auto max-w-7xl sm:px-6 lg:px-8">
-                    <div className="flex justify-between h-16">
-                        <div className="flex">
-                            <div className="flex items-center shrink-0">
-                                <Link href="/">
-                                    <ApplicationLogo className="block w-auto text-gray-800 fill-current h-9" />
-                                </Link>
-                            </div>
-
-                            <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route('dashboard')}
-                                    active={route().current('dashboard')}
-                                >
-                                    Dashboard
-                                </NavLink>
-                                <NavLink
-                                    href={route('users.index')}
-                                    active={route().current('users.index')}
-                                >
-                                    Users
-                                </NavLink>
-                                <NavLink
-                                    href={route('projects.index')}
-                                    active={route().current('projects.index')}
-                                >
-                                    Projects
-                                </NavLink>
-                                <NavLink
-                                    href={route('tasks.index')}
-                                    active={route().current('tasks.index')}
-                                >
-                                    Tasks
-                                </NavLink>
-                                <NavLink
-                                    href={route('tasks.my_tasks')}
-                                    active={route().current('tasks.my_tasks')}
-                                >
-                                    My Tasks
-                                </NavLink>
-                                <NavLink
-                                    href={route('chat.index')}
-                                    active={route().current('chat.index')}
-                                >
-                                    Chats
-                                </NavLink>
-                            </div>
-                        </div>
-
-                        <div className="hidden sm:ms-6 sm:flex sm:items-center">
-                            <div className="relative ms-3">
-                                <Dropdown>
-                                    <Dropdown.Trigger>
-                                        <span className="inline-flex rounded-md">
-                                            <button
-                                                type="button"
-                                                className="inline-flex items-center px-3 py-2 text-sm font-medium leading-4 text-gray-500 transition duration-150 ease-in-out bg-white border border-transparent rounded-md hover:text-gray-700 focus:outline-none"
-                                            >
-                                                {user.name}
-
-                                                <svg
-                                                    className="-me-0.5 ms-2 h-4 w-4"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    viewBox="0 0 20 20"
-                                                    fill="currentColor"
-                                                >
-                                                    <path
-                                                        fillRule="evenodd"
-                                                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                                                        clipRule="evenodd"
-                                                    />
-                                                </svg>
-                                            </button>
-                                        </span>
-                                    </Dropdown.Trigger>
-
-                                    <Dropdown.Content>
-                                        <Dropdown.Link
-                                            href={route('profile.edit')}
-                                        >
-                                            Profile
-                                        </Dropdown.Link>
-                                        <Dropdown.Link
-                                            href={route('logout')}
-                                            method="post"
-                                            as="button"
-                                        >
-                                            Log Out
-                                        </Dropdown.Link>
-                                    </Dropdown.Content>
-                                </Dropdown>
-                            </div>
-                        </div>
-
-                        <div className="flex items-center -me-2 sm:hidden">
-                            <button
-                                onClick={() =>
-                                    setShowingNavigationDropdown(
-                                        (previousState) => !previousState,
-                                    )
-                                }
-                                className="inline-flex items-center justify-center p-2 text-gray-400 transition duration-150 ease-in-out rounded-md hover:bg-gray-100 hover:text-gray-500 focus:bg-gray-100 focus:text-gray-500 focus:outline-none"
-                            >
-                                <svg
-                                    className="w-6 h-6"
-                                    stroke="currentColor"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                >
-                                    <path
-                                        className={
-                                            !showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M4 6h16M4 12h16M4 18h16"
-                                    />
-                                    <path
-                                        className={
-                                            showingNavigationDropdown
-                                                ? 'inline-flex'
-                                                : 'hidden'
-                                        }
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        strokeWidth="2"
-                                        d="M6 18L18 6M6 6l12 12"
-                                    />
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
+        <React.Fragment>
+            <div className={containerClass}>
+                <AppTopbar ref={topbarRef} />
+                <div ref={sidebarRef} className="layout-sidebar">
+                    <AppSidebar />
                 </div>
-
-                <div
-                    className={
-                        (showingNavigationDropdown ? 'block' : 'hidden') +
-                        ' sm:hidden'
-                    }
-                >
-                    <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink
-                            href={route('dashboard')}
-                            active={route().current('dashboard')}
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
-                    </div>
-
-                    <div className="pt-4 pb-1 border-t border-gray-200">
-                        <div className="px-4">
-                            <div className="text-base font-medium text-gray-800">
-                                {user.name}
-                            </div>
-                            <div className="text-sm font-medium text-gray-500">
-                                {user.email}
-                            </div>
-                        </div>
-
-                        <div className="mt-3 space-y-1">
-                            <ResponsiveNavLink href={route('profile.edit')}>
-                                Profile
-                            </ResponsiveNavLink>
-                            <ResponsiveNavLink
-                                method="post"
-                                href={route('logout')}
-                                as="button"
-                            >
-                                Log Out
-                            </ResponsiveNavLink>
-                        </div>
-                    </div>
+                <div className="layout-main-container">
+                    <div className="layout-main">{children}</div>
+                    <AppFooter />
                 </div>
-            </nav>
-
-            {header && (
-                <header className="bg-white shadow">
-                    <div className="px-4 py-6 mx-auto max-w-7xl sm:px-6 lg:px-8">
-                        {header}
-                    </div>
-                </header>
-            )}
-
-            <main>{children}</main>
-        </div>
+                <AppConfig />
+                <div className="layout-mask"></div>
+            </div>
+        </React.Fragment>
     );
-}
+};
+
+export default AuthenticatedLayout;

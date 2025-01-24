@@ -7,12 +7,12 @@ const TableHeading = forwardRef(function TableHeading(
 ) {
     return (
 
-        <th ref={ref} {...props} className={"px-6 py-3 cursor-pointer " + className} scope="col">
+        <th ref={ref} {...props} className={`px-6 py-3 ${sortable && 'cursor-pointer'} ` + className} scope="col">
             <div className="flex items-center">
                 {props.children}
-                {sortable ? (
+                {sortable && (
                     <SortIcon sortByField={sortByField} currentField={currentField} sortDir={sortDir} />
-                ) : null}
+                )}
 
             </div>
         </th >

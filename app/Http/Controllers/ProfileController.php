@@ -48,8 +48,9 @@ class ProfileController extends Controller
     public function update_picture(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'picture' => ['required', 'image', 'max:1024'],
+            'picture' => ['required', 'image', 'max:10024'],
         ]);
+        // dd($request->all());
         $user = Auth::user();
         $picture = $request->file('picture');
         $picture_path = $picture->store('users/' . $user->id . '/profile_pictures', 'public');
