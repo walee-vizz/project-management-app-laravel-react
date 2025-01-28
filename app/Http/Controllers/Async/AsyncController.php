@@ -37,12 +37,17 @@ class AsyncController extends Controller
                         $q->where('name', 'like', '%' . $search . '%');
                     });
             }
-            if ($user_id) {
-                $q->whereHas('participants', function ($q) use ($user_id) {
-                    $q->where('users.id', $user_id);
-                });
-            }
+            // if ($user_id) {
+            //     $q->whereHas('participants', function ($q) use ($user_id) {
+            //         $q->where('users.id', $user_id);
+            //     });
+            // }
         });
+        if ($user_id) {
+            $query->whereHas('participants', function ($q) use ($user_id) {
+                $q->where('users.id', $user_id);
+            });
+        }
         $rooms = $query
             // ->orderBy($sort_by, $sort_dir)
             ->get();

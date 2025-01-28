@@ -152,7 +152,7 @@ export default function Index({ auth, sessionParams, users, queryParams = null, 
                             <table className="w-full text-sm text-left text-gray-500 rtl:text-right dark:text-gray-400">
                                 <thead className="text-xs text-gray-700 uppercase bg-gray-50 dark:bg-gray-700 dark:text-gray-400">
                                     <tr>
-                                        <TableHeading onClick={() => sortBy('id')} sortByField={sortByField} currentField="id" sortDir={sortDir} >
+                                        <TableHeading sortable={false}>
                                             Sr. No
                                         </TableHeading>
                                         <TableHeading onClick={() => sortBy('name')} sortByField={sortByField} currentField="name" sortDir={sortDir} >Name</TableHeading>

@@ -14,7 +14,7 @@ export default function ChatRoomList({ auth, user, withSearch = false, onSelecti
     const [rooms, setRooms] = useState([]);
     const [selectedRoom, setSelectedRoom] = useState(null);
     const [search, setSearch] = useState(null);
-    const fetchRooms = async (userId = currentUserId, searchQuery = null) => {
+    const fetchRooms = async (userId = currentUserId, searchQuery = '') => {
         try {
             let payload = {
                 user_id: userId ? userId : auth.user.id,
@@ -144,7 +144,7 @@ export default function ChatRoomList({ auth, user, withSearch = false, onSelecti
                                 value={search || ""}
                                 onChange={(e) => setSearch(e.target.value)}
                                 onKeyDown={(e) => onKeyPress("search", e)}
-                                className="w-full"
+                                className="w-full border-0"
                                 placeholder="Search..."
                             />
                         </span>

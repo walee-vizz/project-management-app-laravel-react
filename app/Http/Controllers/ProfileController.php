@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\ProfilePictureRequest;
 use App\Models\User;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -45,31 +46,31 @@ class ProfileController extends Controller
     /**
      * Update the user's profile information.
      */
-    public function update_picture(Request $request): RedirectResponse
+    public function update_picture(ProfilePictureRequest $request)
     {
-        $validated = $request->validate([
-            'picture' => ['required', 'image', 'max:10024'],
-        ]);
-        // dd($request->all());
-        $user = Auth::user();
-        $picture = $request->file('picture');
-        $picture_path = $picture->store('users/' . $user->id . '/profile_pictures', 'public');
-        $old_picture = $user->profile_picture;
+        $validated = $request->validated();
+        try {
+            $user = Auth::user();
+            $picture = $request->file('picture');
+            $picture_path = $picture->store('users/' . $user->id . '/profile_pictures', 'public');
+            $old_picture = $user->profile_picture;
 
-        if ($old_picture) {
-            Storage::delete('public/' . $old_picture);
+            if ($old_picture) {
+                Storage::delete('public/' . $old_picture);
+            }
+
+            $user_updated = User::find($user->id)->update([
+                'profile_picture' => $picture_path,
+            ]);
+
+            if ($user_updated) {
+                session()->flash('success', 'Profile picture updated successfully');
+            } else {
+                session()->flash('error', 'Failed to update profile picture');
+            }
+        } catch (\Exception $e) {
+            session()->flash('error', 'Failed to update profile picture: ' . $e->getMessage());
         }
-
-        $user_updated = User::find($user->id)->update([
-            'profile_picture' => $picture_path,
-        ]);
-
-        if ($user_updated) {
-            session()->flash('success', 'Profile picture updated successfully');
-        } else {
-            session()->flash('error', 'Failed to update profile picture');
-        }
-
         return Redirect::route('profile.edit');
     }
 

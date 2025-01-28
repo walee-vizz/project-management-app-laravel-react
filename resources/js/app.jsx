@@ -15,7 +15,10 @@ import { createInertiaApp } from '@inertiajs/react';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { LayoutProvider } from "@/Layouts/context/layoutcontext.jsx";
 import { PrimeReactProvider } from "primereact/api";
+// import { InertiaProgress } from "@inertiajs/progress";
+import { Toaster } from "react-hot-toast"; // Import Toaster
 
+// InertiaProgress.init();
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
 createInertiaApp({
@@ -28,6 +31,7 @@ createInertiaApp({
             <PrimeReactProvider>
                 <LayoutProvider>
                     <App {...props} />
+                    <Toaster />
                 </LayoutProvider>
             </PrimeReactProvider>
         );

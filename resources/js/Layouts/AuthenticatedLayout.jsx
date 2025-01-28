@@ -13,7 +13,7 @@ import AppConfig from "@/Layouts/AppConfig.jsx";
 import { LayoutContext } from "./context/layoutcontext";
 import { PrimeReactContext } from "primereact/api";
 // import { usePathname, useSearchParams } from "next/navigation";
-const AuthenticatedLayout = ({ children }) => {
+const AuthenticatedLayout = ({ header, children }) => {
     PrimeReactContext.ripple = true;
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
     const { setRipple } = useContext(PrimeReactContext);
@@ -147,6 +147,13 @@ const AuthenticatedLayout = ({ children }) => {
                     <AppSidebar />
                 </div>
                 <div className="layout-main-container">
+                    {header && (
+                        <header className="bg-white">
+                            <div className="px-5 mx-auto max-w-7xl sm:px-6 lg:px-8">
+                                {header}
+                            </div>
+                        </header>
+                    )}
                     <div className="layout-main">{children}</div>
                     <AppFooter />
                 </div>

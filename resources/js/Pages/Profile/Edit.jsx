@@ -5,7 +5,7 @@ import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 import UpdateProfilePictureForm from './Partials/UpdateProfilePictureForm';
 
-export default function Edit({ mustVerifyEmail, status }) {
+export default function Edit({ auth, mustVerifyEmail, status }) {
     return (
         <AuthenticatedLayout
             header={
@@ -20,13 +20,6 @@ export default function Edit({ mustVerifyEmail, status }) {
                 <div className="mx-auto space-y-6 max-w-7xl sm:px-6 lg:px-8">
                     <div className="p-4 bg-white shadow sm:rounded-lg sm:p-8">
                         <UpdateProfilePictureForm
-                            mustVerifyEmail={mustVerifyEmail}
-                            status={status}
-                            className="max-w-xl"
-                        />
-                    </div>
-                    <div className="p-4 bg-white shadow sm:rounded-lg sm:p-8">
-                        <UpdateProfileInformationForm
                             mustVerifyEmail={mustVerifyEmail}
                             status={status}
                             className="max-w-xl"

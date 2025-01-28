@@ -4,7 +4,7 @@ import PrimaryButton from '@/Components/PrimaryButton';
 import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
-
+import toast from 'react-hot-toast'; // Import toast
 export default function UpdateProfilePictureForm({
     mustVerifyEmail,
     status,
@@ -14,13 +14,27 @@ export default function UpdateProfilePictureForm({
 
     const { data, setData, post, errors, processing, recentlySuccessful } =
         useForm({
-            picture: user.profile_picture
+            picture: user.profile_picture,
+            user_id: user.id,
+            user_name: user.name,
         });
 
     const submit = (e) => {
         e.preventDefault();
-
-        post(route('profile.update_picture'), data);
+        console.log(data); // Log the data being sent
+        // post(route('profile.update_picture'), data);
+        post(route('profile.update_picture'), {
+            ...data,
+            onSuccess: () => {
+                // Show success toast
+                toast.success('Profile picture updated successfully!');
+            },
+            onError: (errors) => {
+                console.log(errors);
+                // Show error toast
+                toast.error('Failed to update profile picture. Please try again.');
+            },
+        });
     };
 
     return (
@@ -42,15 +56,14 @@ export default function UpdateProfilePictureForm({
 
             <form onSubmit={submit} className="mt-6 space-y-6">
                 <div>
-                    <TextInput
+                    {/* <TextInput
                         type="file"
                         id="picture"
                         className="block w-full mt-1"
                         onChange={(e) => setData('picture', e.target.files[0])}
-                        required
-                        isFocused
-                    />
-
+                    /> */}
+                    <TextInput id="picture" type="file" name="picture" className={"w-full mt-1 form-input " + (errors.picture ? 'border-red-500' : '')}
+                        onChange={e => setData('picture', e.target.files[0])} />
                     <InputError className="mt-2" message={errors.picture} />
                 </div>
 

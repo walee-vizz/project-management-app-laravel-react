@@ -23,10 +23,10 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
     };
     useEffect(() => {
         if (queryParams?.chat && rooms.length > 0) {
-            // console.log('room param :', queryParams?.chat);
+            console.log('room param :', queryParams?.chat);
             const room = rooms.find(room => room.id == queryParams?.chat);
             if (room) {
-                // console.log('room param found:', room);
+                console.log('room param found:', room);
 
                 setSelectedRoom(room);
                 // router.get(route('chat.index', queryParams));
@@ -52,20 +52,6 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
     return (
         <AuthenticatedLayout
             user={auth.user}
-            header={
-                <div className="flex items-center justify-between">
-
-                    <h2 className="text-xl font-semibold leading-tight text-gray-800">
-                        Chat Rooms
-                    </h2>
-                    <Link
-                        href={route("chat.room.create")}
-                        className="px-3 py-1 text-white transition-all rounded shadow bg-emerald-500 hover:bg-emerald-600"
-                    >
-                        Add new
-                    </Link>
-                </div>
-            }
         >
             <Head title="Rooms" />
 
@@ -106,7 +92,7 @@ export default function Index({ auth, sessionParams, rooms: initialRooms, queryP
                     <ChatRoomList className="w-[25%]" withSearch={true} user={auth.user} auth={auth} onSelection={(val) => { setSelectedRoom(val) }} />
                     {/* <!-- end chat list --> */}
                     {
-                        selectedRoom?.id ? <Room room={selectedRoom} auth={auth} /> : <div className='w-full px-5'></div>
+                        <Room room={selectedRoom} auth={auth} />
                     }
 
                 </div>
