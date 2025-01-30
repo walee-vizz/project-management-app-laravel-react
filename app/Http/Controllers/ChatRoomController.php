@@ -140,11 +140,39 @@ class ChatRoomController extends Controller
     public function send_message(Request $request)
     {
         $validated = $request->validate([
-            'chat_room_id' => ['required', 'integer', 'exists:chat_rooms,id'],
+            'chat_room_id' => ['nullable', 'integer', 'exists:chat_rooms,id'],
             'sender_id' => ['required', 'integer', 'exists:users,id'],
+            'recipients' => [
+                $request->chat_room_id ? 'nullable' : 'required', // Required if chat_room_id is not passed
+                'array',
+                'exists:users,id'
+            ],
             'message' => ['required', 'string', 'max:255'],
+            'is_group' => ['nullable', 'boolean'],
         ]);
+
+        // Set default value for 'is_group' if not provided
+        $validated['is_group'] = $validated['is_group'] ?? false;
+
         try {
+            // if (!$request->chat_room_id) {
+
+            //     $chat = ChatRoom::create([
+            //         'name' => 'New Chat',
+            //         'type' => $validated['is_group'] ? 'group' : 'individual',
+            //         'description' => null,
+            //         'is_group' => $validated['is_group']
+            //     ]);
+            //     if ($chat) {
+            //         $participants = $validated['recipients'];
+            //         // $participants[] = $validated['sender_id'];
+            //         $chat->participants()->sync($validated['sender_id']);
+            //         foreach ($participants as $recipient) {
+            //             $chat->participants()->attach($recipient);
+            //         }
+            //         $validated['chat_room_id'] = $chat->id;
+            //     }
+            // }
             $message = Message::create($validated);
 
             if ($message) {

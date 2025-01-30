@@ -4,19 +4,26 @@ import TextInput from '@/Components/TextInput';
 import { Head, Link, useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { useState, useEffect, useRef } from 'react';
-export default function ({ auth, room = null }) {
+export default function Room({ auth, room }) {
     const [messages, setMessages] = useState(room?.messages && []);
+    const [selectedRoom, setSelectedRoom] = useState(room || null);
     const bottomRef = useRef(null);
     const roomType = room?.type;
+    const { data, setData, post, errors, reset } = useForm({
+        'message': '',
+        'chat_room_id': '',
+        'sender_id': auth?.user?.id,
+    });
     // console.log('Room selected:', room);
     useEffect(() => {
         setMessages(room?.messages);
-
+        setSelectedRoom(room);
+        setData('chat_room_id', room?.id);
         const channel = Echo.channel('chat');
         channel.listen('SendMessageEvent', (e) => {
             console.log('Message Received :', e);
             // Check if the message belongs to the current chat room
-            if (e.chatRoom && e.chatRoom.id === room.id) {
+            if ((e?.chatRoom && e?.chatRoom?.id === room?.id) || (e?.message?.chat_room_id === room?.id)) {
                 // Add the new message to the messages array
                 setMessages(prevMessages => [...prevMessages, e.message]);
                 // Scroll to the bottom of the chat messages
@@ -30,14 +37,9 @@ export default function ({ auth, room = null }) {
         return () => {
             channel.stopListening('SendMessageEvent');
         };
-    }, [room?.id]);
+    }, [room?.id, selectedRoom]);
 
-    const { data, setData, post, errors, reset } = useForm({
-        'message': '',
-        'chat_room_id': room?.id,
-        'sender_id': auth?.user?.id,
-    })
-    const sendMessage = (e) => {
+    const sendMessage = async (e) => {
         e.preventDefault();
         console.log('data submitted :', data);
 

@@ -35,7 +35,7 @@ class SendMessageEvent implements ShouldBroadcastNow
     {
         return [
             'message' => new MessageResource($this->message),
-            'chatRoom' => $this->chatRoom
+            // 'chatRoom' => $this->chatRoom
         ];
     }
 

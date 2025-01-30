@@ -19,7 +19,8 @@ class MessageResource extends JsonResource
         $data = [
             'id' => $this->id,
             'message' => $this->message,
-            'sender' => new UserResource($this->sender),
+            'chat_room_id' => $this->chat_room_id,
+            'sender' => optional($this)->sender ? new UserResource($this->sender) : null,
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

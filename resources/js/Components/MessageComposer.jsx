@@ -14,8 +14,7 @@ export default function MessageComposer({ auth, isGroupChat, onSendMessage }) {
         onSendMessage(messageData);
         setMessage('');
     };
-
-    const sendMessage = (e) => {
+    const sendMessage = async (e) => {
         e.preventDefault();
         console.log('data submitted :', data);
 
@@ -32,6 +31,7 @@ export default function MessageComposer({ auth, isGroupChat, onSendMessage }) {
                 // Handle error, maybe show an error message
             });
     };
+
     return (
         <div className="p-4 border rounded shadow-lg">
             <UserSelectDropdown isMulti={isGroupChat} onSelectionChange={(selectedUsers) => { setSelectedUsersList(selectedUsers); }} />

@@ -14,9 +14,9 @@ export default function ChatButton({ className }) {
         <div className={"sticky bottom-3 flex justify-end " + className} >
             <button
                 className="p-3 text-white bg-blue-500 rounded-full shadow-lg hover:bg-blue-600"
-                onClick={() => setShowOptions(!showOptions)}
+                onClick={() => handleOptionClick('private')}
             >
-                Chat
+                Chat +
             </button>
 
             {showOptions && (
